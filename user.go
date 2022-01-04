@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,6 +14,11 @@ var dsn string
 
 type User struct {
 	gorm.Model
+	Name  string
+	Email string
+}
+
+type UserDTO struct {
 	Name  string
 	Email string
 }
@@ -32,51 +35,68 @@ func InitialMigration() {
 	db.AutoMigrate(&User{})
 }
 
-func AllUsers(w http.ResponseWriter, r *http.Request) {
+func AllUsers(c *gin.Context) {
 
 	var users []User
 
 	db.Find(&users)
-	json.NewEncoder(w).Encode(users)
+	c.JSON(200, users)
+
 }
 
-func NewUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "New User Endpoint Hit")
+func NewUser(c *gin.Context) {
 
-	vars := mux.Vars(r)
-	name := vars["name"]
-	email := vars["email"]
+	fmt.Println("New User")
+	var req User
+	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("An error Occured")
+		return
+	}
 
-	db.Create(&User{Name: name, Email: email})
+	fmt.Println("name" + req.Name)
+	fmt.Println("email" + req.Email)
+	db.Create(&User{Name: req.Name, Email: req.Email})
 
-	fmt.Fprintf(w, "New User Successfully created")
+	c.JSON(201, gin.H{
+		"message": "User Created",
+	})
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(c *gin.Context) {
 
-	vars := mux.Vars(r)
-
-	name := vars["name"]
+	name := c.Param("name")
 
 	var user User
 	db.Where("name = ?", name).Find(&user)
 	db.Delete(&user)
 
-	fmt.Fprintf(w, "User Successfully Deleted")
+	c.JSON(200, gin.H{
+		"message": "User Deleted",
+	})
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateUser(c *gin.Context) {
 
-	vars := mux.Vars(r)
-	name := vars["name"]
-	email := vars["email"]
+	name := c.Param("name")
 
 	var user User
-	db.Where("name = ?", name).Find(&user)
-	user.Email = email
+	if err := db.Where("name = ?", name).First(&user).Error; err != nil {
+		c.JSON(400, gin.H{
+			"message": "User not Found",
+		})
+		return
+	}
+	var req User
+	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("An error Occured")
+		return
+	}
+	user.Email = req.Email
 
 	db.Save(&user)
 
-	fmt.Fprintf(w, "Successfully Updated User")
+	c.JSON(200, gin.H{
+		"message": "User Updated",
+	})
 
 }
