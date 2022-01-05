@@ -7,6 +7,9 @@ import (
 
 	"example.com/go-sandbox/config"
 	"example.com/go-sandbox/controller"
+	"example.com/go-sandbox/repository"
+	"example.com/go-sandbox/service"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -27,7 +30,10 @@ func handleRequests() {
 
 var (
 	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	authController controller.AuthController = controller.NewAuthController()
+	userRepository repository.UserRepository = repository.NewUserRepository(db)
+	jwtService     service.JWTService        = service.NewJWTService()
+	authService    service.AuthService       = service.NewAuthService(userRepository)
+	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
 )
 
 func main() {
