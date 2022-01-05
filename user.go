@@ -4,11 +4,9 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
 var err error
 var dsn string
 
@@ -21,18 +19,6 @@ type User struct {
 type UserDTO struct {
 	Name  string
 	Email string
-}
-
-func InitialMigration() {
-
-	dsn := "host=localhost user=postgres password=running-away-222 dbname=gorm port=5432 sslmode=disable"
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Failed to connect to database")
-	}
-
-	db.AutoMigrate(&User{})
 }
 
 func AllUsers(c *gin.Context) {

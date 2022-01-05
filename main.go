@@ -5,7 +5,10 @@ import (
 	"log"
 	"net/http"
 
+	"example.com/go-sandbox/config"
+	"example.com/go-sandbox/controller"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func helloWorld(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +25,27 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
+var (
+	db             *gorm.DB                  = config.SetupDatabaseConnection()
+	authController controller.AuthController = controller.NewAuthController()
+)
+
 func main() {
+
+	defer config.CloseDatabaseConnection(db)
+
 	fmt.Println("Go ORM Tutorial")
 
-	InitialMigration()
-	handleRequests()
+	r := gin.Default()
+
+	authRoutes := r.Group("api/auth")
+	{
+		authRoutes.POST("/login", authController.Login)
+		authRoutes.POST("/register", authController.Register)
+	}
+
+	r.Run()
+
+	//handleRequests()
+
 }
