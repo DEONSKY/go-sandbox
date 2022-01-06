@@ -3,9 +3,9 @@ package service
 import (
 	"log"
 
-	"example.com/go-sandbox/dto"
-	"example.com/go-sandbox/entity"
-	"example.com/go-sandbox/repository"
+	"github.com/DEONSKY/go-sandbox/dto"
+	"github.com/DEONSKY/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/repository"
 	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
 )

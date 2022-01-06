@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"example.com/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/entity"
 	"gorm.io/gorm"
 )
 

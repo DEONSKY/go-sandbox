@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"example.com/go-sandbox/config"
-	"example.com/go-sandbox/controller"
-	"example.com/go-sandbox/middleware"
-	"example.com/go-sandbox/repository"
-	"example.com/go-sandbox/service"
+	"github.com/DEONSKY/go-sandbox/config"
+	"github.com/DEONSKY/go-sandbox/controller"
+	"github.com/DEONSKY/go-sandbox/middleware"
+	"github.com/DEONSKY/go-sandbox/repository"
+	"github.com/DEONSKY/go-sandbox/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

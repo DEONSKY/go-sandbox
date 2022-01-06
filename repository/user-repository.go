@@ -3,7 +3,7 @@ package repository
 import (
 	"log"
 
-	"example.com/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/entity"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

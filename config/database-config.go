@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"example.com/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/entity"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

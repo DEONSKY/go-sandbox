@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"example.com/go-sandbox/helper"
-	"example.com/go-sandbox/service"
+	"github.com/DEONSKY/go-sandbox/helper"
+	"github.com/DEONSKY/go-sandbox/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )

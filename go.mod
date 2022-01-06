@@ -1,4 +1,4 @@
-module example.com/go-sandbox
+module github.com/DEONSKY/go-sandbox
 
 go 1.17
 
