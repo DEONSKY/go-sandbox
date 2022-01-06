@@ -1,14 +1,22 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.16-alpine
+FROM golang:1.17.5-alpine
 
-WORKDIR /app
+RUN apk update
 
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+RUN apk add git curl
 
-COPY *.go ./
+WORKDIR /root/src
+
+RUN git clone https://github.com/DEONSKY/go-sandbox.git
+
+WORKDIR /root/src/go-sandbox
+
+RUN rm -rf vendor
+
+# Fetch the dependencies
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
 
 RUN go build -o /go-sandbox-app
 
