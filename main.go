@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/DEONSKY/go-sandbox/docs"
+	"github.com/joho/godotenv"
 
 	"github.com/DEONSKY/go-sandbox/config"
 	router "github.com/DEONSKY/go-sandbox/routes"
@@ -27,7 +29,11 @@ func main() {
 	//r := gin.Default()
 
 	app := router.New()
-	log.Fatal(app.Listen(":8080"))
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		panic("Failed to load env file")
+	}
+	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
 
 	server := socketio.NewServer(nil)
 
