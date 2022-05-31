@@ -1,4 +1,4 @@
-package entity
+package model
 
 //Book struct represents books table in database
 type Book struct {

@@ -1,6 +1,42 @@
 package middleware
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v2"
+	"github.com/joho/godotenv"
+)
+
+// Protected protect routes
+func Protected() func(*fiber.Ctx) error {
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		panic("Failed to load env file")
+	}
+	return jwtware.New(jwtware.Config{
+		SigningKey:   []byte(os.Getenv("JWT_SECRET")),
+		ErrorHandler: jwtError,
+	})
+}
+
+func jwtError(c *fiber.Ctx, err error) error {
+	if err.Error() == "Missing or malformed JWT" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{"status": "error", "message": "Missing or malformed JWT", "data": nil})
+
+	} else {
+		fmt.Println(err.Error())
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{"status": "error", "message": "Invalid or expired JWT", "data": nil})
+	}
+}
+
+/*
+package middleware
+
+import (
 	"log"
 	"net/http"
 
@@ -30,4 +66,4 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 		}
 	}
-}
+}*/

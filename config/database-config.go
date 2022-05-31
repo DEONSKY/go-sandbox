@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DEONSKY/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -28,7 +28,7 @@ func SetupDatabaseConnection() *gorm.DB {
 		panic("Failed to create a connection to database")
 	}
 	//nanti kita isi modelnya di sini
-	db.AutoMigrate(&entity.User{}, &entity.Book{})
+	db.AutoMigrate(&model.User{}, &model.Book{})
 	return db
 }
 

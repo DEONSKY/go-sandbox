@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 )
 
 //JWTService is a contract of what jwtService can do
@@ -33,10 +34,11 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() string {
-	secretKey := os.Getenv("JWT_SECRET")
-	if secretKey != "" {
-		secretKey = "ydhnwb"
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		panic("Failed to load env file")
 	}
+	secretKey := os.Getenv("JWT_SECRET")
 	return secretKey
 }
 

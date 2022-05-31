@@ -1,4 +1,4 @@
-package entity
+package model
 
 //User represents users table in database
 type User struct {

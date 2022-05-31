@@ -5,39 +5,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/DEONSKY/go-sandbox/config"
-	"github.com/DEONSKY/go-sandbox/controller"
-	"github.com/DEONSKY/go-sandbox/middleware"
-	"github.com/DEONSKY/go-sandbox/repository"
-	"github.com/DEONSKY/go-sandbox/service"
+	_ "github.com/DEONSKY/go-sandbox/docs"
 
-	"github.com/gin-gonic/gin"
+	"github.com/DEONSKY/go-sandbox/config"
+	router "github.com/DEONSKY/go-sandbox/routes"
+
+	socketio "github.com/googollee/go-socket.io"
 	"gorm.io/gorm"
 )
 
-func helloWorld(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World")
-}
-
-func handleRequests() {
-	myRouter := gin.Default()
-	myRouter.GET("/users", AllUsers)
-	myRouter.POST("/user/", NewUser)
-	myRouter.DELETE("/user/:name", DeleteUser)
-	myRouter.PUT("/user/:name", UpdateUser)
-	myRouter.Run()
-	log.Fatal(http.ListenAndServe(":8081", myRouter))
-}
-
 var (
-	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
-	bookRepository repository.BookRepository = repository.NewBookRepository(db)
-	jwtService     service.JWTService        = service.NewJWTService()
-	authService    service.AuthService       = service.NewAuthService(userRepository)
-	bookService    service.BookService       = service.NewBookService(bookRepository)
-	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
-	bookController controller.BookController = controller.NewBookController(bookService, jwtService)
+	db *gorm.DB = config.SetupDatabaseConnection()
 )
 
 func main() {
@@ -46,24 +24,50 @@ func main() {
 
 	fmt.Println("Go ORM Tutorial")
 
-	r := gin.Default()
+	//r := gin.Default()
 
-	authRoutes := r.Group("api/auth")
-	{
-		authRoutes.POST("/login", authController.Login)
-		authRoutes.POST("/register", authController.Register)
-	}
-	bookRoutes := r.Group("api/books", middleware.AuthorizeJWT(jwtService))
-	{
-		bookRoutes.GET("/", bookController.All)
-		bookRoutes.POST("/", bookController.Insert)
-		bookRoutes.GET("/:id", bookController.FindByID)
-		bookRoutes.PUT("/:id", bookController.Update)
-		bookRoutes.DELETE("/:id", bookController.Delete)
-	}
+	app := router.New()
+	log.Fatal(app.Listen(":8080"))
 
-	r.Run()
+	server := socketio.NewServer(nil)
 
-	//handleRequests()
+	server.OnConnect("/", func(s socketio.Conn) error {
+		s.SetContext("")
+		fmt.Println("connected:", s.ID())
+		return nil
+	})
+
+	server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
+		fmt.Println("notice:", msg)
+		s.Emit("reply", "have "+msg)
+	})
+
+	server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
+		s.SetContext(msg)
+		return "recv " + msg
+	})
+
+	server.OnEvent("/", "bye", func(s socketio.Conn) string {
+		last := s.Context().(string)
+		s.Emit("bye", last)
+		s.Close()
+		return last
+	})
+
+	server.OnError("/", func(s socketio.Conn, e error) {
+		fmt.Println("meet error:", e)
+	})
+
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		fmt.Println("closed", reason)
+	})
+
+	go server.Serve()
+	defer server.Close()
+
+	http.Handle("/socket.io/", server)
+	http.Handle("/", http.FileServer(http.Dir("./asset")))
+	log.Println("Serving at localhost:5000...")
+	log.Fatal(http.ListenAndServe(":5000", nil))
 
 }

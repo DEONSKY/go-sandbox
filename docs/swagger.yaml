@@ -1,0 +1,21 @@
+info:
+  contact: {}
+paths:
+  /v1/books:
+    get:
+      consumes:
+      - application/json
+      description: Get all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: ""
+      summary: Get all books
+      tags:
+      - books
+swagger: "2.0"

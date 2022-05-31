@@ -1,17 +1,17 @@
 package repository
 
 import (
-	"github.com/DEONSKY/go-sandbox/entity"
+	"github.com/DEONSKY/go-sandbox/model"
 	"gorm.io/gorm"
 )
 
 //BookRepository is a ....
 type BookRepository interface {
-	InsertBook(b entity.Book) entity.Book
-	UpdateBook(b entity.Book) entity.Book
-	DeleteBook(b entity.Book)
-	AllBook() []entity.Book
-	FindBookByID(bookID uint64) entity.Book
+	InsertBook(b model.Book) model.Book
+	UpdateBook(b model.Book) model.Book
+	DeleteBook(b model.Book)
+	AllBook() []model.Book
+	FindBookByID(bookID uint64) model.Book
 }
 
 type bookConnection struct {
@@ -25,30 +25,30 @@ func NewBookRepository(dbConn *gorm.DB) BookRepository {
 	}
 }
 
-func (db *bookConnection) InsertBook(b entity.Book) entity.Book {
+func (db *bookConnection) InsertBook(b model.Book) model.Book {
 	db.connection.Save(&b)
 	db.connection.Preload("User").Find(&b)
 	return b
 }
 
-func (db *bookConnection) UpdateBook(b entity.Book) entity.Book {
+func (db *bookConnection) UpdateBook(b model.Book) model.Book {
 	db.connection.Save(&b)
 	db.connection.Preload("User").Find(&b)
 	return b
 }
 
-func (db *bookConnection) DeleteBook(b entity.Book) {
+func (db *bookConnection) DeleteBook(b model.Book) {
 	db.connection.Delete(&b)
 }
 
-func (db *bookConnection) FindBookByID(bookID uint64) entity.Book {
-	var book entity.Book
+func (db *bookConnection) FindBookByID(bookID uint64) model.Book {
+	var book model.Book
 	db.connection.Preload("User").Find(&book, bookID)
 	return book
 }
 
-func (db *bookConnection) AllBook() []entity.Book {
-	var books []entity.Book
+func (db *bookConnection) AllBook() []model.Book {
+	var books []model.Book
 	db.connection.Preload("User").Find(&books)
 	return books
 }
