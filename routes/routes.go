@@ -16,12 +16,10 @@ import (
 
 var (
 	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
 	bookRepository repository.BookRepository = repository.NewBookRepository(db)
 	jwtService     service.JWTService        = service.NewJWTService()
-	authService    service.AuthService       = service.NewAuthService(userRepository)
 	bookService    service.BookService       = service.NewBookService(bookRepository)
-	authHandler    handler.AuthHandler       = handler.NewAuthController(authService, jwtService)
+	authHandler    handler.AuthHandler       = handler.NewAuthController(jwtService)
 	bookHandler    handler.BookHandler       = handler.NewBookController(bookService, jwtService)
 )
 
@@ -48,6 +46,17 @@ func New() *fiber.App {
 	bookRoutes.Get("/:id", bookHandler.FindByID)
 	bookRoutes.Put("/:id", bookHandler.Update)
 	bookRoutes.Delete("/:id", bookHandler.Delete)
+
+	issueRoutes := root.Group("/issue", middleware.Protected())
+	issueRoutes.Post("/", handler.InsertIssue)
+	issueRoutes.Get("/", handler.GetIssues)
+
+	projectRoutes := root.Group("/project", middleware.Protected())
+	projectRoutes.Post("/", handler.InsertProject)
+
+	subjectRoutes := root.Group("/subject", middleware.Protected())
+	subjectRoutes.Post("/", handler.InsertSubject)
+	subjectRoutes.Post("/:subject_id/:user_id", handler.InsertUserToSubject)
 
 	return app
 }

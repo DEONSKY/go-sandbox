@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/DEONSKY/go-sandbox/dto"
+	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 //BookController is a ...
@@ -86,15 +86,15 @@ func (c *bookHandler) FindByID(context *fiber.Ctx) error {
 // @Failure 503
 // @Router /v1/books [get]
 func (c *bookHandler) Insert(context *fiber.Ctx) error {
-	var bookCreateDTO dto.BookCreateDTO
+	var bookCreateDTO request.BookCreateRequest
 	errDTO := context.BodyParser(&bookCreateDTO)
 	if errDTO != nil {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
 		return context.Status(http.StatusBadRequest).JSON(res)
 	} else {
-		authHeader := context.Request().Header.Peek("Authorization")
-		userID := c.getUserIDByToken(string(authHeader))
-		convertedUserID, err := strconv.ParseUint(userID, 10, 64)
+		user := context.Locals("user").(*jwt.Token)
+		claims := user.Claims.(jwt.MapClaims)
+		convertedUserID, err := strconv.ParseUint(claims["user_id"].(string), 10, 64)
 		if err == nil {
 			bookCreateDTO.UserID = convertedUserID
 		}
@@ -114,7 +114,7 @@ func (c *bookHandler) Insert(context *fiber.Ctx) error {
 // @Failure 503
 // @Router /v1/books [get]
 func (c *bookHandler) Update(context *fiber.Ctx) error {
-	var bookUpdateDTO dto.BookUpdateDTO
+	var bookUpdateDTO request.BookUpdateRequest
 	errDTO := context.BodyParser(&bookUpdateDTO)
 	if errDTO != nil {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})

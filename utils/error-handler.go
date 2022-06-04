@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,8 +20,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		code = e.Code
 	}
 
-	return c.Status(code).JSON(&httpError{
-		Statuscode: code,
-		Error:      err.Error(),
-	})
+	res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
+
+	return c.Status(code).JSON(res)
 }

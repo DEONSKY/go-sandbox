@@ -31,3 +31,13 @@ func BuildErrorResponse(message string, err string, data interface{}) Response {
 	}
 	return res
 }
+
+func BuildCustomErrorResponse(message string, err string) Response {
+	res := Response{
+		Status:  false,
+		Message: message,
+		Errors:  err,
+		Data:    EmptyObj{},
+	}
+	return res
+}

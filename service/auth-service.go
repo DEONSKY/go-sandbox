@@ -3,34 +3,15 @@ package service
 import (
 	"log"
 
-	"github.com/DEONSKY/go-sandbox/dto"
+	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/repository"
 	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
 )
 
-//AuthService is a contract about something that this service can do
-type AuthService interface {
-	VerifyCredential(email string, password string) interface{}
-	CreateUser(user dto.RegisterDTO) model.User
-	FindByEmail(email string) model.User
-	IsDuplicateEmail(email string) bool
-}
-
-type authService struct {
-	userRepository repository.UserRepository
-}
-
-//NewAuthService creates a new instance of AuthService
-func NewAuthService(userRep repository.UserRepository) AuthService {
-	return &authService{
-		userRepository: userRep,
-	}
-}
-
-func (service *authService) VerifyCredential(email string, password string) interface{} {
-	res := service.userRepository.VerifyCredential(email, password)
+func VerifyCredential(email string, password string) interface{} {
+	res := repository.VerifyCredential(email, password)
 	if v, ok := res.(model.User); ok {
 		comparedPassword := comparePassword(v.Password, []byte(password))
 		if v.Email == email && comparedPassword {
@@ -41,22 +22,22 @@ func (service *authService) VerifyCredential(email string, password string) inte
 	return false
 }
 
-func (service *authService) CreateUser(user dto.RegisterDTO) model.User {
+func CreateUser(user request.RegisterRequest) model.User {
 	userToCreate := model.User{}
 	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
 	if err != nil {
 		log.Fatalf("Failed map %v", err)
 	}
-	res := service.userRepository.InsertUser(userToCreate)
+	res := repository.InsertUser(userToCreate)
 	return res
 }
 
-func (service *authService) FindByEmail(email string) model.User {
-	return service.userRepository.FindByEmail(email)
+func FindByEmail(email string) model.User {
+	return repository.FindByEmail(email)
 }
 
-func (service *authService) IsDuplicateEmail(email string) bool {
-	res := service.userRepository.IsDuplicateEmail(email)
+func IsDuplicateEmail(email string) bool {
+	res := repository.IsDuplicateEmail(email)
 	return !(res.Error == nil)
 }
 

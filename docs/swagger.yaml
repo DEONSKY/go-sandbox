@@ -1,6 +1,523 @@
+definitions:
+  helper.EmptyObj:
+    type: object
+  helper.Response:
+    properties:
+      data: {}
+      errors: {}
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  model.Issue:
+    properties:
+      assignie:
+        $ref: '#/definitions/model.User'
+      comments:
+        items:
+          $ref: '#/definitions/model.IssueComment'
+        type: array
+      createdAt:
+        type: string
+      creator:
+        $ref: '#/definitions/model.User'
+      dependentIssues:
+        items:
+          $ref: '#/definitions/model.Issue'
+        type: array
+      description:
+        type: string
+      id:
+        type: integer
+      issue:
+        items:
+          $ref: '#/definitions/model.Issue'
+        type: array
+      issueForeignId:
+        type: string
+      progress:
+        type: integer
+      spendingTime:
+        type: integer
+      status:
+        type: integer
+      subject:
+        $ref: '#/definitions/model.Subject'
+      targetTime:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.IssueComment:
+    properties:
+      context:
+        type: string
+      createdAt:
+        type: string
+      creator:
+        $ref: '#/definitions/model.User'
+      id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  model.Project:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      subjects:
+        items:
+          $ref: '#/definitions/model.Subject'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.Stage:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: integer
+      startTime:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.Subject:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      issues:
+        items:
+          $ref: '#/definitions/model.Issue'
+        type: array
+      project:
+        $ref: '#/definitions/model.Project'
+      repoId:
+        type: string
+      stages:
+        items:
+          $ref: '#/definitions/model.Stage'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+    type: object
+  model.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      token:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  request.IssueCreateRequest:
+    properties:
+      assignieID:
+        type: integer
+      creatorID:
+        type: integer
+      description:
+        type: string
+      issueForeignId:
+        type: string
+      status:
+        type: integer
+      subjectID:
+        type: integer
+      targetTime:
+        type: integer
+      title:
+        type: string
+    required:
+    - description
+    - subjectID
+    - title
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.ProjectCreateRequest:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  request.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  request.SubjectCreateRequest:
+    properties:
+      description:
+        type: string
+      projectID:
+        type: integer
+      title:
+        type: string
+    required:
+    - description
+    - projectID
+    - title
+    type: object
+  response.IssueResponse:
+    properties:
+      assignieID:
+        type: integer
+      childIssues:
+        items:
+          $ref: '#/definitions/response.LeafIssueResponse'
+        type: array
+      createdAt:
+        type: string
+      creatorID:
+        type: integer
+      dependentIssues:
+        items:
+          $ref: '#/definitions/response.LeafIssueResponse'
+        type: array
+      description:
+        type: string
+      issueForeignId:
+        type: string
+      status:
+        type: integer
+      subjectID:
+        type: integer
+      targetTime:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.LeafIssueResponse:
+    properties:
+      assignieID:
+        type: integer
+      childIssues:
+        items:
+          $ref: '#/definitions/response.LeafIssueResponse'
+        type: array
+      createdAt:
+        type: string
+      creatorID:
+        type: integer
+      dependentIssues:
+        items:
+          $ref: '#/definitions/response.LeafIssueResponse'
+        type: array
+      description:
+        type: string
+      issueForeignId:
+        type: string
+      status:
+        type: integer
+      subjectID:
+        type: integer
+      targetTime:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
 info:
-  contact: {}
+  contact:
+    email: your@mail.com
+    name: API Support
+  description: This is an auto-generated API Docs.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: API
+  version: "1.0"
 paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: loginRequest
+        in: body
+        name: Auth
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/helper.EmptyObj'
+              type: object
+      summary: Login
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Regişter
+      parameters:
+      - description: registerRequest
+        in: body
+        name: Auth
+        required: true
+        schema:
+          $ref: '#/definitions/request.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/helper.EmptyObj'
+              type: object
+      summary: Register
+      tags:
+      - auth
+  /api/issue:
+    get:
+      consumes:
+      - application/json
+      description: GetIssues is a function to get all issues data from database with
+        dynamic query parameters
+      parameters:
+      - in: query
+        name: assignieID
+        type: integer
+      - in: query
+        name: creatorID
+        type: integer
+      - in: query
+        name: parentIssueID
+        type: integer
+      - in: query
+        name: projectID
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      - in: query
+        name: subjectID
+        type: integer
+      - in: query
+        name: userID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.IssueResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/helper.EmptyObj'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all issues with query parameters
+      tags:
+      - Issues
+    post:
+      consumes:
+      - application/json
+      description: Creates new issue
+      parameters:
+      - description: createIssues
+        in: body
+        name: Issue
+        required: true
+        schema:
+          $ref: '#/definitions/request.IssueCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Issue'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/helper.EmptyObj'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create new Issue
+      tags:
+      - Issues
+  /api/project:
+    post:
+      consumes:
+      - application/json
+      description: Adds new project to database
+      parameters:
+      - description: Create Project
+        in: body
+        name: Project
+        required: true
+        schema:
+          $ref: '#/definitions/request.ProjectCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Project'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Project
+      tags:
+      - project
+  /api/subject:
+    post:
+      consumes:
+      - application/json
+      description: Adds new subject to database
+      parameters:
+      - description: Create Subject
+        in: body
+        name: Project
+        required: true
+        schema:
+          $ref: '#/definitions/request.SubjectCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Project'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Subject
+      tags:
+      - Subject
   /v1/books:
     get:
       consumes:
@@ -18,4 +535,9 @@ paths:
       summary: Get all books
       tags:
       - books
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

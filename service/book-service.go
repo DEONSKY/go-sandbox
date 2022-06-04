@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/DEONSKY/go-sandbox/dto"
+	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/repository"
 	"github.com/mashingan/smapping"
@@ -12,8 +12,8 @@ import (
 
 //BookService is a ....
 type BookService interface {
-	Insert(b dto.BookCreateDTO) model.Book
-	Update(b dto.BookUpdateDTO) model.Book
+	Insert(b request.BookCreateRequest) model.Book
+	Update(b request.BookUpdateRequest) model.Book
 	Delete(b model.Book)
 	All() []model.Book
 	FindByID(bookID uint64) model.Book
@@ -31,7 +31,7 @@ func NewBookService(bookRepo repository.BookRepository) BookService {
 	}
 }
 
-func (service *bookService) Insert(b dto.BookCreateDTO) model.Book {
+func (service *bookService) Insert(b request.BookCreateRequest) model.Book {
 	book := model.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
@@ -41,7 +41,7 @@ func (service *bookService) Insert(b dto.BookCreateDTO) model.Book {
 	return res
 }
 
-func (service *bookService) Update(b dto.BookUpdateDTO) model.Book {
+func (service *bookService) Update(b request.BookUpdateRequest) model.Book {
 	book := model.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
