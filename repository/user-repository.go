@@ -63,8 +63,10 @@ func hashAndSalt(pwd []byte) string {
 	return string(hash)
 }
 
-func FindUser(user_id uint64) model.User {
+func FindUser(user_id uint64) (*model.User, error) {
 	var user model.User
-	config.DB.First(&user, user_id)
-	return user
+	if result := config.DB.First(&user, user_id); result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
 }

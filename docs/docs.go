@@ -384,7 +384,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Adds new subject to database",
+                "description": "Creates subject - user many2many association",
                 "consumes": [
                     "application/json"
                 ],
@@ -394,16 +394,21 @@ const docTemplate = `{
                 "tags": [
                     "Subject"
                 ],
-                "summary": "Insert Subject",
+                "summary": "Creates subject - user many2many association",
                 "parameters": [
                     {
-                        "description": "Create Subject",
-                        "name": "Project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.SubjectCreateRequest"
-                        }
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "subjectID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -418,7 +423,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.Project"
+                                            "$ref": "#/definitions/model.Subject"
                                         }
                                     }
                                 }
@@ -508,14 +513,17 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "issue": {
+                "issueForeignId": {
+                    "type": "string"
+                },
+                "issues": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.Issue"
                     }
                 },
-                "issueForeignId": {
-                    "type": "string"
+                "p": {
+                    "type": "integer"
                 },
                 "progress": {
                     "type": "integer"
@@ -699,6 +707,9 @@ const docTemplate = `{
                 "issueForeignId": {
                     "type": "string"
                 },
+                "parentIssueID": {
+                    "type": "integer"
+                },
                 "status": {
                     "type": "integer"
                 },
@@ -787,34 +798,33 @@ const docTemplate = `{
                 "assignieID": {
                     "type": "integer"
                 },
-                "childIssues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.LeafIssueResponse"
-                    }
-                },
                 "createdAt": {
+                    "description": "DependentIssues []LeafIssueResponse ` + "`" + `json:\"dependentIssues\"` + "`" + `",
                     "type": "string"
                 },
                 "creatorID": {
+                    "description": "SubjectID       uint64              ` + "`" + `json:\"subjectID\"` + "`" + `",
                     "type": "integer"
-                },
-                "dependentIssues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.LeafIssueResponse"
-                    }
                 },
                 "description": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "issueForeignId": {
                     "type": "string"
                 },
-                "status": {
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.LeafIssueResponse"
+                    }
+                },
+                "parentIssueId": {
                     "type": "integer"
                 },
-                "subjectID": {
+                "status": {
                     "type": "integer"
                 },
                 "targetTime": {
@@ -834,23 +844,12 @@ const docTemplate = `{
                 "assignieID": {
                     "type": "integer"
                 },
-                "childIssues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.LeafIssueResponse"
-                    }
-                },
                 "createdAt": {
                     "type": "string"
                 },
                 "creatorID": {
+                    "description": "SubjectID       uint64              ` + "`" + `json:\"subjectID\"` + "`" + `",
                     "type": "integer"
-                },
-                "dependentIssues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.LeafIssueResponse"
-                    }
                 },
                 "description": {
                     "type": "string"
@@ -858,10 +857,10 @@ const docTemplate = `{
                 "issueForeignId": {
                     "type": "string"
                 },
-                "status": {
+                "parentIssueId": {
                     "type": "integer"
                 },
-                "subjectID": {
+                "status": {
                     "type": "integer"
                 },
                 "targetTime": {

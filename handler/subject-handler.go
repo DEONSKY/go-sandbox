@@ -17,8 +17,8 @@ import (
 // @Tags Subject
 // @Accept json
 // @Produce json
-// @Param Project body request.SubjectCreateRequest true "Create Subject"
-// @Success 200 {object} helper.Response{data=model.Project}
+// @Param Subject body request.SubjectCreateRequest true "Create Subject"
+// @Success 200 {object} helper.Response{data=model.Subject}
 // @Failure 400 {object} helper.Response{}
 // @Security ApiKeyAuth
 // @Router /api/subject [post]
@@ -31,26 +31,45 @@ func InsertSubject(context *fiber.Ctx) error {
 	}
 	result, err := service.CreateSubject(subjectCreateDTO)
 	if err != nil {
-		return fiber.NewError(fiber.StatusServiceUnavailable, err.Error())
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
 	response := helper.BuildResponse(true, "OK", result)
 	return context.Status(http.StatusCreated).JSON(response)
 
 }
 
+// Creates subject - user many2many association
+// @Summary Creates subject - user many2many association
+// @Description Creates subject - user many2many association
+// @Tags Subject
+// @Accept json
+// @Produce json
+// @Param subjectID path string true "Subject ID"
+// @Param userID path string true "User ID"
+// @Success 200 {object} helper.Response{data=model.Subject}
+// @Failure 400 {object} helper.Response{}
+// @Security ApiKeyAuth
+// @Router /api/subject [post]
 func InsertUserToSubject(context *fiber.Ctx) error {
 	subject_id, err := strconv.ParseUint(context.Params("subject_id"), 10, 64)
 	log.Println(subject_id)
+	if err != nil {
+		res := helper.BuildErrorResponse("Wrong Subject Parameter", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
 	user_id, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
 	log.Println(user_id)
 	if err != nil {
-		res := helper.BuildErrorResponse("Wrong Parameter", err.Error(), helper.EmptyObj{})
+		res := helper.BuildErrorResponse("Wrong User Parameter", err.Error(), helper.EmptyObj{})
 		return context.Status(http.StatusBadRequest).JSON(res)
 	}
 	log.Println("here")
-	result := service.InsertUserToSubject(
+	result, err := service.InsertUserToSubject(
 		subject_id,
 		user_id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
 
 	response := helper.BuildResponse(true, "OK", result)
 	return context.Status(http.StatusCreated).JSON(response)

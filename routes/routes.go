@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"gorm.io/gorm"
 )
 
@@ -29,10 +30,15 @@ func New() *fiber.App {
 	})
 
 	app.Use(cors.New())
+	app.Use(requestid.New())
+	app.Use(logger.New(logger.Config{
+		// For more options, see the Config section
+		Format: "[${time}] ${status} ${latency} ${method} ${path} - ${pid} - ${locals:requestid}\n",
+	}))
 
 	app.Get("/docs/*", swagger.HandlerDefault)
 
-	root := app.Group("/api", logger.New())
+	root := app.Group("/api")
 
 	authRoutes := root.Group("/auth")
 

@@ -30,12 +30,14 @@ definitions:
         type: string
       id:
         type: integer
-      issue:
+      issueForeignId:
+        type: string
+      issues:
         items:
           $ref: '#/definitions/model.Issue'
         type: array
-      issueForeignId:
-        type: string
+      p:
+        type: integer
       progress:
         type: integer
       spendingTime:
@@ -152,6 +154,8 @@ definitions:
         type: string
       issueForeignId:
         type: string
+      parentIssueID:
+        type: integer
       status:
         type: integer
       subjectID:
@@ -215,25 +219,25 @@ definitions:
     properties:
       assignieID:
         type: integer
-      childIssues:
-        items:
-          $ref: '#/definitions/response.LeafIssueResponse'
-        type: array
       createdAt:
+        description: DependentIssues []LeafIssueResponse `json:"dependentIssues"`
         type: string
       creatorID:
+        description: SubjectID       uint64              `json:"subjectID"`
         type: integer
-      dependentIssues:
+      description:
+        type: string
+      id:
+        type: integer
+      issueForeignId:
+        type: string
+      issues:
         items:
           $ref: '#/definitions/response.LeafIssueResponse'
         type: array
-      description:
-        type: string
-      issueForeignId:
-        type: string
-      status:
+      parentIssueId:
         type: integer
-      subjectID:
+      status:
         type: integer
       targetTime:
         type: integer
@@ -246,25 +250,18 @@ definitions:
     properties:
       assignieID:
         type: integer
-      childIssues:
-        items:
-          $ref: '#/definitions/response.LeafIssueResponse'
-        type: array
       createdAt:
         type: string
       creatorID:
+        description: SubjectID       uint64              `json:"subjectID"`
         type: integer
-      dependentIssues:
-        items:
-          $ref: '#/definitions/response.LeafIssueResponse'
-        type: array
       description:
         type: string
       issueForeignId:
         type: string
-      status:
+      parentIssueId:
         type: integer
-      subjectID:
+      status:
         type: integer
       targetTime:
         type: integer
@@ -489,14 +486,18 @@ paths:
     post:
       consumes:
       - application/json
-      description: Adds new subject to database
+      description: Creates subject - user many2many association
       parameters:
-      - description: Create Subject
-        in: body
-        name: Project
+      - description: Subject ID
+        in: path
+        name: subjectID
         required: true
-        schema:
-          $ref: '#/definitions/request.SubjectCreateRequest'
+        type: string
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -507,7 +508,7 @@ paths:
             - $ref: '#/definitions/helper.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/model.Project'
+                  $ref: '#/definitions/model.Subject'
               type: object
         "400":
           description: Bad Request
@@ -515,7 +516,7 @@ paths:
             $ref: '#/definitions/helper.Response'
       security:
       - ApiKeyAuth: []
-      summary: Insert Subject
+      summary: Creates subject - user many2many association
       tags:
       - Subject
   /v1/books:

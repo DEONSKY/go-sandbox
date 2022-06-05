@@ -20,6 +20,7 @@ type IssueCreateRequest struct {
 	SubjectID      uint64  `json:"subjectID" form:"subjectID" binding:"required"`
 	CreatorID      uint64  `json:"creatorID,omitempty"  form:"creatorID,omitempty`
 	AssignieID     *uint64 `json:"assignieID,omitempty"  form:"assignieID,omitempty`
+	ParentIssueID  *uint64 `json:"parentIssueID,omitempty"  form:"parentIssueID,omitempty"`
 }
 
 type IssueGetQuery struct {

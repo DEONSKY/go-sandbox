@@ -14,18 +14,23 @@ func CreateSubject(subjectCreateDTO request.SubjectCreateRequest) (*model.Subjec
 	log.Println(subjectCreateDTO)
 	err := smapping.FillStruct(&subjectToCreate, smapping.MapFields(&subjectCreateDTO))
 	if err != nil {
-		log.Fatalf("Failed map %v", err)
+		return nil, err
 	}
 	log.Println(subjectToCreate)
 	res, err := repository.InsertSubject(subjectToCreate)
 	return res, err
 }
 
-func InsertUserToSubject(subject_id uint64, user_id uint64) model.Subject {
-	subject := repository.FindSubject(subject_id)
-	log.Println(subject)
-	user := repository.FindUser(user_id)
+func InsertUserToSubject(subject_id uint64, user_id uint64) (*model.Subject, error) {
+	subject, err := repository.FindSubject(subject_id)
+	if err != nil {
+		return nil, err
+	}
+	user, err := repository.FindUser(user_id)
+	if err != nil {
+		return nil, err
+	}
 	log.Println(user)
-	res := repository.InsertUserToSubject(subject, user)
-	return res
+	res, err := repository.InsertUserToSubject(*subject, *user)
+	return res, err
 }

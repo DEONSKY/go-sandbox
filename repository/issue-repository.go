@@ -8,6 +8,7 @@ import (
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
+	"gorm.io/gorm"
 )
 
 func InsertIssue(issue model.Issue) (*model.Issue, error) {
@@ -45,7 +46,9 @@ func GetIssues(issueGetQuery *request.IssueGetQuery) ([]response.IssueResponse, 
 	}
 	res := strings.Join(queryParams, " AND ")
 
-	if result := config.DB.Model(&model.Issue{}).Preload("Subject").Where(res,
+	if result := config.DB.Model(&model.Issue{}).Preload("ChildIssues", func(tx *gorm.DB) *gorm.DB {
+		return tx.Model(&model.Issue{}).Select("Title", "Description", "IssueForeignId", "TargetTime", "Status", "ParentIssueID", "CreatorID", "AssignieID", "CreatedAt", "UpdatedAt")
+	}).Where(res,
 		sql.Named("creator_id", issueGetQuery.CreatorID),
 		sql.Named("subject_id", issueGetQuery.SubjectID),
 		sql.Named("project_id", config.DB.Table("subjects").
