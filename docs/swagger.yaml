@@ -143,6 +143,10 @@ definitions:
         type: string
       updatedAt:
         type: string
+      user:
+        items:
+          $ref: '#/definitions/model.Subject'
+        type: array
     type: object
   request.IssueCreateRequest:
     properties:
@@ -268,6 +272,30 @@ definitions:
       title:
         type: string
       updatedAt:
+        type: string
+    type: object
+  response.ProjectNavTreeResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      subjects:
+        items:
+          $ref: '#/definitions/response.SubjectNavTreeResponse'
+        type: array
+      title:
+        type: string
+    type: object
+  response.SubjectNavTreeResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      project_id:
+        type: integer
+      title:
         type: string
     type: object
 info:
@@ -480,6 +508,45 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Insert Project
+      tags:
+      - project
+  /api/project/sidenav-options:
+    post:
+      consumes:
+      - application/json
+      description: Returns projects that the user is a member of, with subjects
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.ProjectNavTreeResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/helper.EmptyObj'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Returns projects that the user is a member of, with subjects
       tags:
       - project
   /api/subject:

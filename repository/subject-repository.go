@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/DEONSKY/go-sandbox/config"
+	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
 )
 
@@ -26,4 +27,14 @@ func FindSubject(subjet_id uint64) (*model.Subject, error) {
 		return nil, result.Error
 	}
 	return &subject, nil
+}
+
+func GetSubjectsByUserId(userID uint64) ([]response.SubjectNavTreeResponse, error) {
+	var subjectNavTreeResponse []response.SubjectNavTreeResponse
+	if result := config.DB.Model(&model.Subject{}).
+		Joins("INNER JOIN subject_users su on su.subject_id = id").
+		Where("su.user_id", userID).Order("ID").Find(&subjectNavTreeResponse); result.Error != nil {
+		return nil, result.Error
+	}
+	return subjectNavTreeResponse, nil
 }
