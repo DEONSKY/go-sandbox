@@ -24,6 +24,83 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/add-issue-dependency/{issue_id}/{dependent_issue_id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Adds assocation with issue and dependent issue",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Adds assocation with issue and dependent issue",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Issue ID",
+                        "name": "issue_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Dependent Issue ID",
+                        "name": "dependent_issue_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Issue"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/helper.EmptyObj"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "Login",
@@ -179,6 +256,11 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "name": "creatorID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "getOnlyOrphans",
                         "in": "query"
                     },
                     {
@@ -454,6 +536,63 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "Adds new subject to database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Insert Subject",
+                "parameters": [
+                    {
+                        "description": "Create Subject",
+                        "name": "Subject",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SubjectCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Subject"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/subject/{subject_id}/{user_id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates subject - user many2many association",
                 "consumes": [
                     "application/json"
@@ -469,14 +608,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Subject ID",
-                        "name": "subjectID",
+                        "name": "subject_id",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "User ID",
-                        "name": "userID",
+                        "name": "user_id",
                         "in": "path",
                         "required": true
                     }
@@ -504,6 +643,83 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/helper.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/assignie-user/{issue_id}/{user_id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Adds assocation with issue and dependent issue",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Adds assocation between issue and assigned user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Issue ID",
+                        "name": "issue_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Assignie User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.Issue"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/helper.EmptyObj"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -875,12 +1091,16 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "createdAt": {
-                    "description": "DependentIssues []LeafIssueResponse ` + "`" + `json:\"dependentIssues\"` + "`" + `",
                     "type": "string"
                 },
                 "creatorID": {
-                    "description": "SubjectID       uint64              ` + "`" + `json:\"subjectID\"` + "`" + `",
                     "type": "integer"
+                },
+                "dependentIssues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.LeafIssueResponse"
+                    }
                 },
                 "description": {
                     "type": "string"
@@ -888,7 +1108,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "issueForeignId": {
+                "issueForeignID": {
                     "type": "string"
                 },
                 "issues": {
@@ -897,10 +1117,13 @@ const docTemplate = `{
                         "$ref": "#/definitions/response.LeafIssueResponse"
                     }
                 },
-                "parentIssueId": {
+                "parentIssueID": {
                     "type": "integer"
                 },
                 "status": {
+                    "type": "integer"
+                },
+                "subjectID": {
                     "type": "integer"
                 },
                 "targetTime": {
@@ -924,19 +1147,24 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "creatorID": {
-                    "description": "SubjectID       uint64              ` + "`" + `json:\"subjectID\"` + "`" + `",
                     "type": "integer"
                 },
                 "description": {
                     "type": "string"
                 },
-                "issueForeignId": {
+                "id": {
+                    "type": "integer"
+                },
+                "issueForeignID": {
                     "type": "string"
                 },
-                "parentIssueId": {
+                "parentIssueID": {
                     "type": "integer"
                 },
                 "status": {
+                    "type": "integer"
+                },
+                "subjectID": {
                     "type": "integer"
                 },
                 "targetTime": {

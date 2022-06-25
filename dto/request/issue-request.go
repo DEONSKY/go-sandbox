@@ -24,11 +24,12 @@ type IssueCreateRequest struct {
 }
 
 type IssueGetQuery struct {
-	UserID        *uint64 `query:"userID"`
-	SubjectID     *uint64 `query:"subjectID"`
-	ProjectID     *uint64 `query:"projectID"`
-	CreatorID     *uint64 `query:"creatorID"`
-	AssignieID    *uint64 `query:"assignieID"`
-	Status        *uint8  `query:"status"`
-	ParentIssueID *uint64 `query:"parentIssueID"`
+	UserID         *uint64 `query:"userID"`
+	SubjectID      *uint64 `query:"subjectID"`
+	ProjectID      *uint64 `query:"projectID"`
+	CreatorID      *uint64 `query:"creatorID"`
+	AssignieID     *uint64 `query:"assignieID"`
+	Status         *uint8  `query:"status"`
+	ParentIssueID  *uint64 `query:"parentIssueID"`
+	GetOnlyOrphans *bool   `query:"getOnlyOrphans"`
 }

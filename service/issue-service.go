@@ -27,3 +27,29 @@ func GetIssues(issueGetQuery *request.IssueGetQuery) ([]response.IssueResponse, 
 	res, err := repository.GetIssues(issueGetQuery)
 	return res, err
 }
+
+func InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64) (*model.Issue, error) {
+	issue, err := repository.FindIssue(issueID)
+	if err != nil {
+		return nil, err
+	}
+	dependentIssue, err := repository.FindIssue(dependentIssueID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := repository.InsertDependentIssueAssociation(*issue, *dependentIssue)
+	return res, err
+}
+
+func AssignieIssueToUser(issueID uint64, userID uint64) (*model.Issue, error) {
+	issue, err := repository.FindIssue(issueID)
+	if err != nil {
+		return nil, err
+	}
+	user, err := repository.FindUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := repository.AssignieIssueToUser(*issue, *user)
+	return res, err
+}

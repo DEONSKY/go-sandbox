@@ -67,7 +67,11 @@ func GetIssues(context *fiber.Ctx) error {
 			" user_id subject_id, project_id, creator_id, assignie_id, parent_issue_id")
 		return context.Status(http.StatusBadRequest).JSON(res)
 	}
-	log.Println(iq.SubjectID)
+	log.Println(iq)
+	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
+		res := helper.BuildErrorResponse("Request Error", "An issue cannot be orphan and has parent at the same time", helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
 	result, err := service.GetIssues(iq)
 	if err != nil {
 		res := helper.BuildErrorResponse("Repository Error", err.Error(), helper.EmptyObj{})
@@ -75,4 +79,78 @@ func GetIssues(context *fiber.Ctx) error {
 	}
 	response := helper.BuildResponse(true, "OK", result)
 	return context.Status(http.StatusOK).JSON(response)
+}
+
+// InsertDependentIssueAssociation adds assocation between issue and dependent issue
+// @Summary Adds assocation with issue and dependent issue
+// @Description Adds assocation with issue and dependent issue
+// @Tags Issues
+// @Accept json
+// @Produce json
+// @Param issue_id path string true "Issue ID"
+// @Param dependent_issue_id path string true "Dependent Issue ID"
+// @Success 200 {object} helper.Response{data=model.Issue}
+// @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
+// @Security ApiKeyAuth
+// @Router /add-issue-dependency/{issue_id}/{dependent_issue_id} [put]
+func InsertDependentIssueAssociation(context *fiber.Ctx) error {
+	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
+	log.Println(issueID)
+	if err != nil {
+		res := helper.BuildErrorResponse("Wrong Issue Parameter", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	dependentIssueID, err := strconv.ParseUint(context.Params("dependent_issue_id"), 10, 64)
+	log.Println(dependentIssueID)
+	if err != nil {
+		res := helper.BuildErrorResponse("Wrong Dependent Issue Parameter", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	log.Println("here")
+	result, err := service.InsertDependentIssueAssociation(
+		issueID,
+		dependentIssueID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	response := helper.BuildResponse(true, "OK", result)
+	return context.Status(http.StatusCreated).JSON(response)
+}
+
+// AssignieIssueToUser adds assocation between issue and assigned user
+// @Summary Adds assocation between issue and assigned user
+// @Description Adds assocation with issue and dependent issue
+// @Tags Issues
+// @Accept json
+// @Produce json
+// @Param issue_id path string true "Issue ID"
+// @Param user_id path string true "Assignie User ID"
+// @Success 200 {object} helper.Response{data=model.Issue}
+// @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
+// @Security ApiKeyAuth
+// @Router /assignie-user/{issue_id}/{user_id} [put]
+func AssignieIssueToUser(context *fiber.Ctx) error {
+	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
+	log.Println(issueID)
+	if err != nil {
+		res := helper.BuildErrorResponse("Wrong Issue Parameter", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	userID, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
+	log.Println(userID)
+	if err != nil {
+		res := helper.BuildErrorResponse("Wrong User Parameter", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	log.Println("here")
+	result, err := service.AssignieIssueToUser(
+		issueID,
+		userID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+	}
+
+	response := helper.BuildResponse(true, "OK", result)
+	return context.Status(http.StatusCreated).JSON(response)
 }

@@ -56,6 +56,8 @@ func New() *fiber.App {
 	issueRoutes := root.Group("/issue", middleware.Protected())
 	issueRoutes.Post("/", handler.InsertIssue)
 	issueRoutes.Get("/", handler.GetIssues)
+	issueRoutes.Put("/add-issue-dependency/:issue_id/:dependent_issue_id", handler.InsertDependentIssueAssociation)
+	issueRoutes.Put("/assignie-user/:issue_id/:user_id", handler.AssignieIssueToUser)
 
 	projectRoutes := root.Group("/project", middleware.Protected())
 	projectRoutes.Post("/", handler.InsertProject)
@@ -63,7 +65,7 @@ func New() *fiber.App {
 
 	subjectRoutes := root.Group("/subject", middleware.Protected())
 	subjectRoutes.Post("/", handler.InsertSubject)
-	subjectRoutes.Post("/:subject_id/:user_id", handler.InsertUserToSubject)
+	subjectRoutes.Put("/:subject_id/:user_id", handler.InsertUserToSubject)
 
 	return app
 }

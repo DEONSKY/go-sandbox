@@ -44,12 +44,12 @@ func InsertSubject(context *fiber.Ctx) error {
 // @Tags Subject
 // @Accept json
 // @Produce json
-// @Param subjectID path string true "Subject ID"
-// @Param userID path string true "User ID"
+// @Param subject_id path string true "Subject ID"
+// @Param user_id path string true "User ID"
 // @Success 200 {object} helper.Response{data=model.Subject}
 // @Failure 400 {object} helper.Response{}
 // @Security ApiKeyAuth
-// @Router /api/subject [post]
+// @Router /api/subject/{subject_id}/{user_id} [put]
 func InsertUserToSubject(context *fiber.Ctx) error {
 	subject_id, err := strconv.ParseUint(context.Params("subject_id"), 10, 64)
 	log.Println(subject_id)

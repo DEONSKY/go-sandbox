@@ -224,24 +224,28 @@ definitions:
       assignieID:
         type: integer
       createdAt:
-        description: DependentIssues []LeafIssueResponse `json:"dependentIssues"`
         type: string
       creatorID:
-        description: SubjectID       uint64              `json:"subjectID"`
         type: integer
+      dependentIssues:
+        items:
+          $ref: '#/definitions/response.LeafIssueResponse'
+        type: array
       description:
         type: string
       id:
         type: integer
-      issueForeignId:
+      issueForeignID:
         type: string
       issues:
         items:
           $ref: '#/definitions/response.LeafIssueResponse'
         type: array
-      parentIssueId:
+      parentIssueID:
         type: integer
       status:
+        type: integer
+      subjectID:
         type: integer
       targetTime:
         type: integer
@@ -257,15 +261,18 @@ definitions:
       createdAt:
         type: string
       creatorID:
-        description: SubjectID       uint64              `json:"subjectID"`
         type: integer
       description:
         type: string
-      issueForeignId:
+      id:
+        type: integer
+      issueForeignID:
         type: string
-      parentIssueId:
+      parentIssueID:
         type: integer
       status:
+        type: integer
+      subjectID:
         type: integer
       targetTime:
         type: integer
@@ -310,6 +317,50 @@ info:
   title: API
   version: "1.0"
 paths:
+  /add-issue-dependency/{issue_id}/{dependent_issue_id}:
+    put:
+      consumes:
+      - application/json
+      description: Adds assocation with issue and dependent issue
+      parameters:
+      - description: Issue ID
+        in: path
+        name: issue_id
+        required: true
+        type: string
+      - description: Dependent Issue ID
+        in: path
+        name: dependent_issue_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Issue'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/helper.EmptyObj'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Adds assocation with issue and dependent issue
+      tags:
+      - Issues
   /api/auth/login:
     post:
       consumes:
@@ -395,6 +446,9 @@ paths:
       - in: query
         name: creatorID
         type: integer
+      - in: query
+        name: getOnlyOrphans
+        type: boolean
       - in: query
         name: parentIssueID
         type: integer
@@ -553,16 +607,49 @@ paths:
     post:
       consumes:
       - application/json
+      description: Adds new subject to database
+      parameters:
+      - description: Create Subject
+        in: body
+        name: Subject
+        required: true
+        schema:
+          $ref: '#/definitions/request.SubjectCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Subject'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Insert Subject
+      tags:
+      - Subject
+  /api/subject/{subject_id}/{user_id}:
+    put:
+      consumes:
+      - application/json
       description: Creates subject - user many2many association
       parameters:
       - description: Subject ID
         in: path
-        name: subjectID
+        name: subject_id
         required: true
         type: string
       - description: User ID
         in: path
-        name: userID
+        name: user_id
         required: true
         type: string
       produces:
@@ -586,6 +673,50 @@ paths:
       summary: Creates subject - user many2many association
       tags:
       - Subject
+  /assignie-user/{issue_id}/{user_id}:
+    put:
+      consumes:
+      - application/json
+      description: Adds assocation with issue and dependent issue
+      parameters:
+      - description: Issue ID
+        in: path
+        name: issue_id
+        required: true
+        type: string
+      - description: Assignie User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Issue'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/helper.EmptyObj'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Adds assocation between issue and assigned user
+      tags:
+      - Issues
   /v1/books:
     get:
       consumes:
