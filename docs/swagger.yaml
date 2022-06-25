@@ -564,15 +564,15 @@ paths:
       summary: Insert Project
       tags:
       - project
-  /api/project/sidenav-options:
-    post:
+  /api/project/sidenav-options/{user_id}:
+    get:
       consumes:
       - application/json
       description: Returns projects that the user is a member of, with subjects
       parameters:
       - description: User ID
         in: path
-        name: userID
+        name: user_id
         required: true
         type: integer
       produces:

@@ -450,8 +450,8 @@
                 }
             }
         },
-        "/api/project/sidenav-options": {
-            "post": {
+        "/api/project/sidenav-options/{user_id}": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -472,7 +472,7 @@
                     {
                         "type": "integer",
                         "description": "User ID",
-                        "name": "userID",
+                        "name": "user_id",
                         "in": "path",
                         "required": true
                     }

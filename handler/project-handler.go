@@ -43,11 +43,11 @@ func InsertProject(context *fiber.Ctx) error {
 // @Tags project
 // @Accept json
 // @Produce json
-// @Param userID path uint64 true "User ID"
+// @Param user_id path uint64 true "User ID"
 // @Success 200 {object} helper.Response{data=response.ProjectNavTreeResponse}
 // @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
 // @Security ApiKeyAuth
-// @Router /api/project/sidenav-options [post]
+// @Router /api/project/sidenav-options/{user_id} [get]
 func GetProjectsByUserId(context *fiber.Ctx) error {
 	user_id, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
 	log.Println(user_id)

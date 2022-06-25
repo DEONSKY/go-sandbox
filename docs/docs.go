@@ -459,8 +459,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/project/sidenav-options": {
-            "post": {
+        "/api/project/sidenav-options/{user_id}": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -481,7 +481,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "User ID",
-                        "name": "userID",
+                        "name": "user_id",
                         "in": "path",
                         "required": true
                     }
