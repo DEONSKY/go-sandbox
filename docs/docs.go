@@ -402,6 +402,112 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/issue/kanban": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all issues as Kanban Format with query parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Issues"
+                ],
+                "summary": "Get all issues as Kanban Format with query parameters",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "assignieID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "creatorID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "getOnlyOrphans",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "parentIssueID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "projectID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "subjectID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "userID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.IssueKanbanResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/helper.EmptyObj"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/project": {
             "post": {
                 "security": [
@@ -1084,6 +1190,20 @@ const docTemplate = `{
                 }
             }
         },
+        "response.IssueKanbanResponse": {
+            "type": "object",
+            "properties": {
+                "issues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.IssueResponse"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/response.StatusResponse"
+                }
+            }
+        },
         "response.IssueResponse": {
             "type": "object",
             "properties": {
@@ -1121,6 +1241,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "$ref": "#/definitions/response.StatusResponse"
+                },
+                "statusID": {
                     "type": "integer"
                 },
                 "subjectID": {
@@ -1162,6 +1285,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "$ref": "#/definitions/response.StatusResponse"
+                },
+                "statusID": {
                     "type": "integer"
                 },
                 "subjectID": {
@@ -1192,6 +1318,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/response.SubjectNavTreeResponse"
                     }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.StatusResponse": {
+            "type": "object",
+            "properties": {
+                "hexCode": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"

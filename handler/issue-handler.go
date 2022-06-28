@@ -81,6 +81,39 @@ func GetIssues(context *fiber.Ctx) error {
 	return context.Status(http.StatusOK).JSON(response)
 }
 
+// GetIssuesKanban is a function to get all issues data from database with dynamic query parameters as Kanban format
+// @Summary Get all issues as Kanban Format with query parameters
+// @Description Get all issues as Kanban Format with query parameters
+// @Tags Issues
+// @Accept json
+// @Produce json
+// @Param Issue query request.IssueGetQuery true "getIssues"
+// @Success 200 {object} helper.Response{data=[]response.IssueKanbanResponse}
+// @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
+// @Security ApiKeyAuth
+// @Router /api/issue/kanban [get]
+func GetIssuesKanban(context *fiber.Ctx) error {
+	iq := new(request.IssueGetQuery)
+
+	if err := context.QueryParser(iq); err != nil {
+		res := helper.BuildCustomErrorResponse("Missed required parameters", "Query must be contain one of them of this parameters:"+
+			" user_id subject_id, project_id, creator_id, assignie_id, parent_issue_id")
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	log.Println(iq)
+	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
+		res := helper.BuildErrorResponse("Request Error", "An issue cannot be orphan and has parent at the same time", helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	result, err := service.GetIssuesKanban(iq)
+	if err != nil {
+		res := helper.BuildErrorResponse("Repository Error", err.Error(), helper.EmptyObj{})
+		return context.Status(http.StatusBadRequest).JSON(res)
+	}
+	response := helper.BuildResponse(true, "OK", result)
+	return context.Status(http.StatusOK).JSON(response)
+}
+
 // InsertDependentIssueAssociation adds assocation between issue and dependent issue
 // @Summary Adds assocation with issue and dependent issue
 // @Description Adds assocation with issue and dependent issue

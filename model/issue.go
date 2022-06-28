@@ -18,7 +18,7 @@ type Issue struct {
 	SubjectID       uint64         `gorm:"not null" json:"-"`
 	Subject         Subject        `gorm:"foreignkey:SubjectID;" json:"subject"`
 	ParentIssueID   *uint64        `json:"p"`
-	Status          uint8          `json:"status"`
+	StatusID        uint8          `json:"status"`
 	ChildIssues     []Issue        `gorm:"foreignkey:ParentIssueID;" json:"issues"`
 	DependentIssues []Issue        `gorm:"many2many:DependentIssues;" json:"dependentIssues"`
 	Comments        []IssueComment `gorm:"foreignkey:IssueID;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"comments"`

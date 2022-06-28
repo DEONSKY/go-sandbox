@@ -56,6 +56,7 @@ func New() *fiber.App {
 	issueRoutes := root.Group("/issue", middleware.Protected())
 	issueRoutes.Post("/", handler.InsertIssue)
 	issueRoutes.Get("/", handler.GetIssues)
+	issueRoutes.Get("/kanban/", handler.GetIssuesKanban)
 	issueRoutes.Put("/add-issue-dependency/:issue_id/:dependent_issue_id", handler.InsertDependentIssueAssociation)
 	issueRoutes.Put("/assignie-user/:issue_id/:user_id", handler.AssignieIssueToUser)
 

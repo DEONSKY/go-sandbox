@@ -3,6 +3,7 @@ package service
 import (
 	"log"
 
+	"github.com/DEONSKY/go-sandbox/constant"
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
@@ -25,7 +26,45 @@ func CreateIssue(issueDto request.IssueCreateRequest) (*model.Issue, error) {
 func GetIssues(issueGetQuery *request.IssueGetQuery) ([]response.IssueResponse, error) {
 
 	res, err := repository.GetIssues(issueGetQuery)
+
+	for i, issue := range res {
+		res[i].Status = response.StatusResponse(constant.PredefinedStatusMap[issue.StatusID])
+		for j, childIssues := range res[i].ChildIssues {
+			res[i].ChildIssues[j].Status = response.StatusResponse(constant.PredefinedStatusMap[childIssues.StatusID])
+		}
+		for k, dependentIssues := range res[i].DependentIssues {
+			res[i].DependentIssues[k].Status = response.StatusResponse(constant.PredefinedStatusMap[dependentIssues.StatusID])
+		}
+	}
 	return res, err
+}
+
+func GetIssuesKanban(issueGetQuery *request.IssueGetQuery) ([]response.IssueKanbanResponse, error) {
+
+	res, err := repository.GetIssues(issueGetQuery)
+
+	issueResponseMap := make(map[uint32][]response.IssueResponse)
+
+	for i, issue := range res {
+		issue.Status = response.StatusResponse(constant.PredefinedStatusMap[issue.StatusID])
+		for j, childIssues := range res[i].ChildIssues {
+			issue.ChildIssues[j].Status = response.StatusResponse(constant.PredefinedStatusMap[childIssues.StatusID])
+		}
+		for k, dependentIssues := range res[i].DependentIssues {
+			issue.DependentIssues[k].Status = response.StatusResponse(constant.PredefinedStatusMap[dependentIssues.StatusID])
+		}
+		issueResponseMap[issue.StatusID] = append(issueResponseMap[issue.StatusID], issue)
+	}
+
+	issueKanbanSlice := make([]response.IssueKanbanResponse, 0, len(issueResponseMap))
+
+	for i := range issueResponseMap {
+		var issueKanban response.IssueKanbanResponse
+		issueKanban.Issues = issueResponseMap[i]
+		issueKanban.Status = response.StatusResponse(constant.PredefinedStatusMap[i])
+		issueKanbanSlice = append(issueKanbanSlice, issueKanban)
+	}
+	return issueKanbanSlice, err
 }
 
 func InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64) (*model.Issue, error) {

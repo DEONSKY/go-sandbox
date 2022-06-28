@@ -219,6 +219,15 @@ definitions:
     - projectID
     - title
     type: object
+  response.IssueKanbanResponse:
+    properties:
+      issues:
+        items:
+          $ref: '#/definitions/response.IssueResponse'
+        type: array
+      status:
+        $ref: '#/definitions/response.StatusResponse'
+    type: object
   response.IssueResponse:
     properties:
       assignieID:
@@ -244,6 +253,8 @@ definitions:
       parentIssueID:
         type: integer
       status:
+        $ref: '#/definitions/response.StatusResponse'
+      statusID:
         type: integer
       subjectID:
         type: integer
@@ -271,6 +282,8 @@ definitions:
       parentIssueID:
         type: integer
       status:
+        $ref: '#/definitions/response.StatusResponse'
+      statusID:
         type: integer
       subjectID:
         type: integer
@@ -291,6 +304,15 @@ definitions:
         items:
           $ref: '#/definitions/response.SubjectNavTreeResponse'
         type: array
+      title:
+        type: string
+    type: object
+  response.StatusResponse:
+    properties:
+      hexCode:
+        type: string
+      id:
+        type: integer
       title:
         type: string
     type: object
@@ -529,6 +551,66 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create new Issue
+      tags:
+      - Issues
+  /api/issue/kanban:
+    get:
+      consumes:
+      - application/json
+      description: Get all issues as Kanban Format with query parameters
+      parameters:
+      - in: query
+        name: assignieID
+        type: integer
+      - in: query
+        name: creatorID
+        type: integer
+      - in: query
+        name: getOnlyOrphans
+        type: boolean
+      - in: query
+        name: parentIssueID
+        type: integer
+      - in: query
+        name: projectID
+        type: integer
+      - in: query
+        name: status
+        type: integer
+      - in: query
+        name: subjectID
+        type: integer
+      - in: query
+        name: userID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.IssueKanbanResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/helper.EmptyObj'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all issues as Kanban Format with query parameters
       tags:
       - Issues
   /api/project:

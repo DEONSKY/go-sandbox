@@ -4,13 +4,18 @@ import (
 	"time"
 )
 
+type IssueKanbanResponse struct {
+	Status StatusResponse  `json:"status"`
+	Issues []IssueResponse `json:"issues"`
+}
 type IssueResponse struct {
 	ID              uint64               `json:"id"`
 	Title           string               `json:"title"`
 	Description     string               `json:"description"`
 	IssueForeignId  string               `json:"issueForeignID"`
 	TargetTime      uint32               `json:"targetTime"`
-	Status          uint8                `json:"status"`
+	StatusID        uint32               `json:"statusID"`
+	Status          StatusResponse       `gorm:"-" json:"status"`
 	SubjectID       uint64               `json:"subjectID"`
 	CreatorID       uint64               `json:"creatorID"`
 	AssignieID      *uint64              `json:"assignieID"`
@@ -22,21 +27,28 @@ type IssueResponse struct {
 }
 
 type LeafIssueResponse struct {
-	ID             uint64    `json:"id"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	IssueForeignId string    `json:"issueForeignID"`
-	TargetTime     uint32    `json:"targetTime"`
-	Status         uint8     `json:"status"`
-	ParentIssueID  *uint64   `json:"parentIssueID"`
-	SubjectID      uint64    `json:"subjectID"`
-	CreatorID      uint64    `json:"creatorID"`
-	AssignieID     *uint64   `json:"assignieID"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	ID             uint64         `json:"id"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	IssueForeignId string         `json:"issueForeignID"`
+	TargetTime     uint32         `json:"targetTime"`
+	StatusID       uint32         `json:"statusID"`
+	Status         StatusResponse `gorm:"-" json:"status"`
+	ParentIssueID  *uint64        `json:"parentIssueID"`
+	SubjectID      uint64         `json:"subjectID"`
+	CreatorID      uint64         `json:"creatorID"`
+	AssignieID     *uint64        `json:"assignieID"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	UpdatedAt      time.Time      `json:"updatedAt"`
 }
 
 // TableName overrides the table name for smart select
 func (LeafIssueResponse) TableName() string {
 	return "issues"
+}
+
+type StatusResponse struct {
+	ID      uint32
+	Title   string
+	HexCode string
 }
