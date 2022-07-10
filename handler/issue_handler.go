@@ -8,8 +8,8 @@ import (
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/DEONSKY/go-sandbox/service"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 // InserIssue is a function to create new Issue
@@ -24,26 +24,21 @@ import (
 // @Security ApiKeyAuth
 // @Router /api/issue [post]
 func InsertIssue(context *fiber.Ctx) error {
-	user := context.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
+	userID := context.Locals("user_id").(uint64)
 	var IssueCreateDTO request.IssueCreateRequest
-	log.Println("Here")
+
 	errDTO := context.BodyParser(&IssueCreateDTO)
 	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request DTO Parse Problem", []string{errDTO.Error()})
 	}
 
-	id, err := strconv.ParseUint(claims["user_id"].(string), 10, 64)
-	if err == nil {
-		IssueCreateDTO.CreatorID = id
-	}
+	IssueCreateDTO.ReporterID = userID
+
 	result, err := service.CreateIssue(IssueCreateDTO)
 	if err != nil {
-		res := helper.BuildErrorResponse("Failed to process request", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return err
 	}
-	response := helper.BuildResponse(true, "Issue created succesfully", result)
+	response := helper.BuildResponse("Issue created succesfully", result)
 	return context.Status(http.StatusCreated).JSON(response)
 
 }
@@ -61,23 +56,20 @@ func InsertIssue(context *fiber.Ctx) error {
 // @Router /api/issue [get]
 func GetIssues(context *fiber.Ctx) error {
 	iq := new(request.IssueGetQuery)
+	userID := context.Locals("user_id").(uint64)
 
 	if err := context.QueryParser(iq); err != nil {
-		res := helper.BuildCustomErrorResponse("Missed required parameters", "Query must be contain one of them of this parameters:"+
-			" user_id subject_id, project_id, creator_id, assignie_id, parent_issue_id")
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Query parse problem", []string{err.Error()})
 	}
-	log.Println(iq)
+	log.Println("Params", iq)
 	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
-		res := helper.BuildErrorResponse("Request Error", "An issue cannot be orphan and has parent at the same time", helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Error", []string{"An issue cannot be orphan and has parent at the same time"})
 	}
-	result, err := service.GetIssues(iq)
+	result, err := service.GetIssues(iq, userID)
 	if err != nil {
-		res := helper.BuildErrorResponse("Repository Error", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return err
 	}
-	response := helper.BuildResponse(true, "OK", result)
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusOK).JSON(response)
 }
 
@@ -95,22 +87,20 @@ func GetIssues(context *fiber.Ctx) error {
 func GetIssuesKanban(context *fiber.Ctx) error {
 	iq := new(request.IssueGetQuery)
 
+	userID := context.Locals("user_id").(uint64)
+
 	if err := context.QueryParser(iq); err != nil {
-		res := helper.BuildCustomErrorResponse("Missed required parameters", "Query must be contain one of them of this parameters:"+
-			" user_id subject_id, project_id, creator_id, assignie_id, parent_issue_id")
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Query parse problem", []string{err.Error()})
 	}
 	log.Println(iq)
 	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
-		res := helper.BuildErrorResponse("Request Error", "An issue cannot be orphan and has parent at the same time", helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Error", []string{"An issue cannot be orphan and has parent at the same time"})
 	}
-	result, err := service.GetIssuesKanban(iq)
+	result, err := service.GetIssuesKanban(iq, userID)
 	if err != nil {
-		res := helper.BuildErrorResponse("Repository Error", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return err
 	}
-	response := helper.BuildResponse(true, "OK", result)
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusOK).JSON(response)
 }
 
@@ -128,26 +118,24 @@ func GetIssuesKanban(context *fiber.Ctx) error {
 // @Router /add-issue-dependency/{issue_id}/{dependent_issue_id} [put]
 func InsertDependentIssueAssociation(context *fiber.Ctx) error {
 	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
+	userID := context.Locals("user_id").(uint64)
+
 	log.Println(issueID)
 	if err != nil {
-		res := helper.BuildErrorResponse("Wrong Issue Parameter", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Wrong issue parameter", []string{err.Error()})
 	}
 	dependentIssueID, err := strconv.ParseUint(context.Params("dependent_issue_id"), 10, 64)
 	log.Println(dependentIssueID)
 	if err != nil {
-		res := helper.BuildErrorResponse("Wrong Dependent Issue Parameter", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
-	}
-	log.Println("here")
-	result, err := service.InsertDependentIssueAssociation(
-		issueID,
-		dependentIssueID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Wrong dependent issue parameter", []string{err.Error()})
 	}
 
-	response := helper.BuildResponse(true, "OK", result)
+	result, err := service.InsertDependentIssueAssociation(issueID, dependentIssueID, userID)
+	if err != nil {
+		return err
+	}
+
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusCreated).JSON(response)
 }
 
@@ -165,25 +153,25 @@ func InsertDependentIssueAssociation(context *fiber.Ctx) error {
 // @Router /assignie-user/{issue_id}/{user_id} [put]
 func AssignieIssueToUser(context *fiber.Ctx) error {
 	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
+	userID := context.Locals("user_id").(uint64)
+
 	log.Println(issueID)
 	if err != nil {
 		res := helper.BuildErrorResponse("Wrong Issue Parameter", err.Error(), helper.EmptyObj{})
 		return context.Status(http.StatusBadRequest).JSON(res)
 	}
-	userID, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
-	log.Println(userID)
+	assignieID, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
+	log.Println(assignieID)
 	if err != nil {
 		res := helper.BuildErrorResponse("Wrong User Parameter", err.Error(), helper.EmptyObj{})
 		return context.Status(http.StatusBadRequest).JSON(res)
 	}
 	log.Println("here")
-	result, err := service.AssignieIssueToUser(
-		issueID,
-		userID)
+	result, err := service.AssignieIssueToUser(issueID, assignieID, userID)
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	response := helper.BuildResponse(true, "OK", result)
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusCreated).JSON(response)
 }

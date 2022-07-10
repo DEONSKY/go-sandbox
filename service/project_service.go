@@ -1,30 +1,32 @@
 package service
 
 import (
-	"log"
-
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/repository"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/mashingan/smapping"
 )
 
-func CreateProject(projectCreateDTO request.ProjectCreateRequest) model.Project {
+func CreateProject(projectCreateDTO request.ProjectCreateRequest) (*model.Project, error) {
 	projectToCreate := model.Project{}
 	err := smapping.FillStruct(&projectToCreate, smapping.MapFields(&projectCreateDTO))
 	if err != nil {
-		log.Fatalf("Failed map %v", err)
+		return nil, utils.ReturnErrorResponse(400, "Request DTO Parse Problem", []string{err.Error()})
 	}
-	res := repository.InsertProject(projectToCreate)
-	return res
+	res, err := repository.InsertProject(projectToCreate)
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(422, "Project could not be inserted", []string{err.Error()})
+	}
+	return res, err
 }
 
 func GetProjectsByUserId(userID uint64) ([]response.ProjectNavTreeResponse, error) {
 
 	subjectRes, subjectErr := repository.GetSubjectsByUserId(userID)
 	if subjectErr != nil {
-		return nil, subjectErr
+		return nil, utils.ReturnErrorResponse(400, "Cannot get subjects by user id", []string{subjectErr.Error()})
 	}
 
 	subjectNavTreeMap := make(map[uint64][]response.SubjectNavTreeResponse)
@@ -38,7 +40,7 @@ func GetProjectsByUserId(userID uint64) ([]response.ProjectNavTreeResponse, erro
 
 	res, err := repository.GetProjectsBySubjectIds(projectIdSlice)
 	if err != nil {
-		return nil, err
+		return nil, utils.ReturnErrorResponse(400, "Cannot get projects by project ids", []string{subjectErr.Error()})
 	}
 
 	for i := range res {

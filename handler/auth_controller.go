@@ -68,7 +68,7 @@ func (c *authHandler) Login(ctx *fiber.Ctx) error {
 	if v, ok := authResult.(model.User); ok {
 		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10))
 		v.Token = generatedToken
-		response := helper.BuildResponse(true, "OK!", v)
+		response := helper.BuildResponse("OK!", v)
 		return ctx.Status(http.StatusOK).JSON(response)
 
 	}
@@ -102,7 +102,7 @@ func (c *authHandler) Register(ctx *fiber.Ctx) error {
 		createdUser := service.CreateUser(registerDTO)
 		token := c.jwtService.GenerateToken(strconv.FormatUint(createdUser.ID, 10))
 		createdUser.Token = token
-		response := helper.BuildResponse(true, "OK!", createdUser)
+		response := helper.BuildResponse("OK!", createdUser)
 		return ctx.Status(http.StatusCreated).JSON(response)
 	}
 }

@@ -1,9 +1,6 @@
 package helper
 
-import "strings"
-
 type Response struct {
-	Status  bool        `json:"status"`
 	Message string      `json:"message"`
 	Errors  interface{} `json:"errors"`
 	Data    interface{} `json:"data"`
@@ -11,9 +8,8 @@ type Response struct {
 
 type EmptyObj struct{}
 
-func BuildResponse(status bool, message string, data interface{}) Response {
+func BuildResponse(message string, data interface{}) Response {
 	res := Response{
-		Status:  status,
 		Message: message,
 		Errors:  nil,
 		Data:    data,
@@ -21,20 +17,17 @@ func BuildResponse(status bool, message string, data interface{}) Response {
 	return res
 }
 
-func BuildErrorResponse(message string, err string, data interface{}) Response {
-	spilledError := strings.Split(err, "\n")
+func BuildErrorResponse(message string, err interface{}, data interface{}) Response {
 	res := Response{
-		Status:  false,
 		Message: message,
-		Errors:  spilledError,
+		Errors:  err,
 		Data:    data,
 	}
 	return res
 }
 
-func BuildCustomErrorResponse(message string, err string) Response {
+func BuildCustomErrorResponse(message string, err interface{}) Response {
 	res := Response{
-		Status:  false,
 		Message: message,
 		Errors:  err,
 		Data:    EmptyObj{},

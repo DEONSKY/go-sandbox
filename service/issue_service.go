@@ -1,31 +1,35 @@
 package service
 
 import (
-	"log"
-
 	"github.com/DEONSKY/go-sandbox/constant"
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/repository"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/mashingan/smapping"
 )
 
 func CreateIssue(issueDto request.IssueCreateRequest) (*model.Issue, error) {
 	issueToCreate := model.Issue{}
 	err := smapping.FillStruct(&issueToCreate, smapping.MapFields(&issueDto))
-
-	log.Println("Issue Create Dto", issueToCreate)
 	if err != nil {
-		log.Fatalf("Failed map %v", err)
+		return nil, utils.ReturnErrorResponse(400, "Request DTO Parse Problem", []string{err.Error()})
 	}
 	res, err := repository.InsertIssue(issueToCreate)
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(422, "Issue could not be inserted", []string{err.Error()})
+	}
 	return res, err
 }
 
-func GetIssues(issueGetQuery *request.IssueGetQuery) ([]response.IssueResponse, error) {
+func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
 
-	res, err := repository.GetIssues(issueGetQuery)
+	res, err := repository.GetIssues(issueGetQuery, userID)
+
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(400, "Cannot get issues", []string{err.Error()})
+	}
 
 	for i, issue := range res {
 		res[i].Status = response.StatusResponse(constant.PredefinedStatusMap[issue.StatusID])
@@ -39,9 +43,13 @@ func GetIssues(issueGetQuery *request.IssueGetQuery) ([]response.IssueResponse, 
 	return res, err
 }
 
-func GetIssuesKanban(issueGetQuery *request.IssueGetQuery) ([]response.IssueKanbanResponse, error) {
+func GetIssuesKanban(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueKanbanResponse, error) {
 
-	res, err := repository.GetIssues(issueGetQuery)
+	res, err := repository.GetIssues(issueGetQuery, userID)
+
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(400, "Cannot get issues", []string{err.Error()})
+	}
 
 	issueResponseMap := make(map[uint32][]response.IssueResponse)
 
@@ -67,28 +75,34 @@ func GetIssuesKanban(issueGetQuery *request.IssueGetQuery) ([]response.IssueKanb
 	return issueKanbanSlice, err
 }
 
-func InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64) (*model.Issue, error) {
-	issue, err := repository.FindIssue(issueID)
+func InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64, userID uint64) (*model.Issue, error) {
+	issue, err := repository.FindIssueByAccess(issueID, userID)
 	if err != nil {
-		return nil, err
+		return nil, utils.ReturnErrorResponse(404, "Issue not found", []string{err.Error()})
 	}
-	dependentIssue, err := repository.FindIssue(dependentIssueID)
+	dependentIssue, err := repository.FindIssueByAccess(dependentIssueID, userID)
 	if err != nil {
-		return nil, err
+		return nil, utils.ReturnErrorResponse(404, "Depent Issue not found", []string{err.Error()})
 	}
 	res, err := repository.InsertDependentIssueAssociation(*issue, *dependentIssue)
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(400, "Depentent Issue insertion error", []string{err.Error()})
+	}
 	return res, err
 }
 
-func AssignieIssueToUser(issueID uint64, userID uint64) (*model.Issue, error) {
-	issue, err := repository.FindIssue(issueID)
+func AssignieIssueToUser(issueID uint64, assignieID uint64, userID uint64) (*model.Issue, error) {
+	issue, err := repository.FindIssueByAccess(issueID, userID)
 	if err != nil {
-		return nil, err
+		return nil, utils.ReturnErrorResponse(404, "Issue not found", []string{err.Error()})
 	}
-	user, err := repository.FindUser(userID)
+	user, err := repository.FindUser(assignieID)
 	if err != nil {
-		return nil, err
+		return nil, utils.ReturnErrorResponse(404, "User not found", []string{err.Error()})
 	}
 	res, err := repository.AssignieIssueToUser(*issue, *user)
+	if err != nil {
+		return nil, utils.ReturnErrorResponse(400, "User assignie associtoation insertion error", []string{err.Error()})
+	}
 	return res, err
 }

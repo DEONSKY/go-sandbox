@@ -46,7 +46,7 @@ func NewBookController(bookServ service.BookService, jwtServ service.JWTService)
 // @Router /v1/books [get]
 func (c *bookHandler) All(context *fiber.Ctx) error {
 	var books []model.Book = c.bookService.All()
-	res := helper.BuildResponse(true, "OK", books)
+	res := helper.BuildResponse("OK", books)
 	return context.Status(http.StatusOK).JSON(res)
 }
 
@@ -71,7 +71,7 @@ func (c *bookHandler) FindByID(context *fiber.Ctx) error {
 		res := helper.BuildErrorResponse("Data not found", "No data with given id", helper.EmptyObj{})
 		return context.Status(http.StatusNotFound).JSON(res)
 	} else {
-		res := helper.BuildResponse(true, "OK", book)
+		res := helper.BuildResponse("OK", book)
 		return context.Status(http.StatusOK).JSON(res)
 	}
 }
@@ -99,7 +99,7 @@ func (c *bookHandler) Insert(context *fiber.Ctx) error {
 			bookCreateDTO.UserID = convertedUserID
 		}
 		result := c.bookService.Insert(bookCreateDTO)
-		response := helper.BuildResponse(true, "OK", result)
+		response := helper.BuildResponse("OK", result)
 		return context.Status(http.StatusCreated).JSON(response)
 	}
 }
@@ -135,7 +135,7 @@ func (c *bookHandler) Update(context *fiber.Ctx) error {
 			bookUpdateDTO.UserID = id
 		}
 		result := c.bookService.Update(bookUpdateDTO)
-		response := helper.BuildResponse(true, "OK", result)
+		response := helper.BuildResponse("OK", result)
 		return context.Status(http.StatusOK).JSON(response)
 	} else {
 		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
@@ -169,7 +169,7 @@ func (c *bookHandler) Delete(context *fiber.Ctx) error {
 	userID := fmt.Sprintf("%v", claims["user_id"])
 	if c.bookService.IsAllowedToEdit(userID, book.ID) {
 		c.bookService.Delete(book)
-		res := helper.BuildResponse(true, "Deleted", helper.EmptyObj{})
+		res := helper.BuildResponse("Deleted", helper.EmptyObj{})
 		return context.Status(http.StatusOK).JSON(res)
 	} else {
 		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})

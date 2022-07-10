@@ -62,7 +62,7 @@ func New() *fiber.App {
 
 	projectRoutes := root.Group("/project", middleware.Protected())
 	projectRoutes.Post("/", handler.InsertProject)
-	projectRoutes.Get("/sidenav-options/:user_id", handler.GetProjectsByUserId)
+	projectRoutes.Get("/sidenav-options/", handler.GetProjectsByUserId)
 
 	subjectRoutes := root.Group("/subject", middleware.Protected())
 	subjectRoutes.Post("/", handler.InsertSubject)

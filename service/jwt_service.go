@@ -2,11 +2,10 @@ package service
 
 import (
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/DEONSKY/go-sandbox/config"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/joho/godotenv"
 )
 
 //JWTService is a contract of what jwtService can do
@@ -34,11 +33,7 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() string {
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		panic("Failed to load env file")
-	}
-	secretKey := os.Getenv("JWT_SECRET")
+	secretKey := config.EnvironmentVariablesData.JWTSecret
 	return secretKey
 }
 
@@ -46,7 +41,7 @@ func (j *jwtService) GenerateToken(UserID string) string {
 	claims := &jwtCustomClaim{
 		UserID,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
+			ExpiresAt: time.Now().AddDate(0, 0, 1).Unix(),
 			Issuer:    j.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},

@@ -22,8 +22,8 @@ type Issue struct {
 	ChildIssues     []Issue        `gorm:"foreignkey:ParentIssueID;" json:"issues"`
 	DependentIssues []Issue        `gorm:"many2many:DependentIssues;" json:"dependentIssues"`
 	Comments        []IssueComment `gorm:"foreignkey:IssueID;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"comments"`
-	CreatorID       uint64         `gorm:"not null" json:"-"`
-	Creator         User           `gorm:"foreignkey:CreatorID;" json:"creator"`
+	ReporterID      uint64         `gorm:"not null" json:"-"`
+	Reporter        User           `gorm:"foreignkey:ReporterID;" json:"reporter"`
 	AssignieID      *uint64        `json:"-"`
 	Assignie        User           `gorm:"foreignkey:AssignieID;" json:"assignie"`
 	CreatedAt       time.Time      `json:"createdAt"`

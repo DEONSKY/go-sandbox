@@ -2,22 +2,21 @@ package middleware
 
 import (
 	"fmt"
-	"os"
+	"strconv"
 
+	"github.com/DEONSKY/go-sandbox/config"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
-	"github.com/joho/godotenv"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // Protected protect routes
 func Protected() func(*fiber.Ctx) error {
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		panic("Failed to load env file")
-	}
 	return jwtware.New(jwtware.Config{
-		SigningKey:   []byte(os.Getenv("JWT_SECRET")),
-		ErrorHandler: jwtError,
+		SigningKey:     []byte(config.EnvironmentVariablesData.JWTSecret),
+		ErrorHandler:   jwtError,
+		SuccessHandler: jwtSuccess,
 	})
 }
 
@@ -31,6 +30,19 @@ func jwtError(c *fiber.Ctx, err error) error {
 		c.Status(fiber.StatusUnauthorized)
 		return c.JSON(fiber.Map{"status": "error", "message": "Invalid or expired JWT", "data": nil})
 	}
+}
+
+func jwtSuccess(c *fiber.Ctx) error {
+	user := c.Locals("user").(*jwt.Token)
+
+	claims := user.Claims.(jwt.MapClaims)
+	id, err := strconv.ParseUint(claims["user_id"].(string), 10, 64)
+	//TODO use redis
+	if err != nil {
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "UserID cant get from jwt token", []string{err.Error()})
+	}
+	c.Locals("user_id", id)
+	return c.Next()
 }
 
 /*

@@ -254,11 +254,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "creatorID",
-                        "in": "query"
-                    },
-                    {
                         "type": "boolean",
                         "name": "getOnlyOrphans",
                         "in": "query"
@@ -275,17 +270,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "name": "reporterID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "name": "subjectID",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "userID",
                         "in": "query"
                     }
                 ],
@@ -427,11 +422,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "creatorID",
-                        "in": "query"
-                    },
-                    {
                         "type": "boolean",
                         "name": "getOnlyOrphans",
                         "in": "query"
@@ -448,17 +438,17 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "name": "reporterID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "name": "status",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "name": "subjectID",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "userID",
                         "in": "query"
                     }
                 ],
@@ -869,9 +859,6 @@ const docTemplate = `{
                 "errors": {},
                 "message": {
                     "type": "string"
-                },
-                "status": {
-                    "type": "boolean"
                 }
             }
         },
@@ -889,9 +876,6 @@ const docTemplate = `{
                 },
                 "createdAt": {
                     "type": "string"
-                },
-                "creator": {
-                    "$ref": "#/definitions/model.User"
                 },
                 "dependentIssues": {
                     "type": "array",
@@ -919,6 +903,9 @@ const docTemplate = `{
                 },
                 "progress": {
                     "type": "integer"
+                },
+                "reporter": {
+                    "$ref": "#/definitions/model.User"
                 },
                 "spendingTime": {
                     "type": "integer"
@@ -971,6 +958,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "projectLeader": {
+                    "$ref": "#/definitions/model.User"
                 },
                 "subjects": {
                     "type": "array",
@@ -1042,6 +1032,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/model.Stage"
                     }
                 },
+                "teamLeader": {
+                    "$ref": "#/definitions/model.User"
+                },
                 "title": {
                     "type": "string"
                 },
@@ -1071,17 +1064,17 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "subjects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Subject"
+                    }
+                },
                 "token": {
                     "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
-                },
-                "user": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Subject"
-                    }
                 }
             }
         },
@@ -1096,9 +1089,6 @@ const docTemplate = `{
                 "assignieID": {
                     "type": "integer"
                 },
-                "creatorID": {
-                    "type": "integer"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -1106,6 +1096,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parentIssueID": {
+                    "type": "integer"
+                },
+                "reporterID": {
                     "type": "integer"
                 },
                 "status": {
@@ -1213,9 +1206,6 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "creatorID": {
-                    "type": "integer"
-                },
                 "dependentIssues": {
                     "type": "array",
                     "items": {
@@ -1238,6 +1228,9 @@ const docTemplate = `{
                     }
                 },
                 "parentIssueID": {
+                    "type": "integer"
+                },
+                "reporterID": {
                     "type": "integer"
                 },
                 "status": {
@@ -1269,9 +1262,6 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "creatorID": {
-                    "type": "integer"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -1282,6 +1272,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "parentIssueID": {
+                    "type": "integer"
+                },
+                "reporterID": {
                     "type": "integer"
                 },
                 "status": {

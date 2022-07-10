@@ -7,8 +7,6 @@ definitions:
       errors: {}
       message:
         type: string
-      status:
-        type: boolean
     type: object
   model.Issue:
     properties:
@@ -20,8 +18,6 @@ definitions:
         type: array
       createdAt:
         type: string
-      creator:
-        $ref: '#/definitions/model.User'
       dependentIssues:
         items:
           $ref: '#/definitions/model.Issue'
@@ -40,6 +36,8 @@ definitions:
         type: integer
       progress:
         type: integer
+      reporter:
+        $ref: '#/definitions/model.User'
       spendingTime:
         type: integer
       status:
@@ -74,6 +72,8 @@ definitions:
         type: string
       id:
         type: integer
+      projectLeader:
+        $ref: '#/definitions/model.User'
       subjects:
         items:
           $ref: '#/definitions/model.Subject'
@@ -120,6 +120,8 @@ definitions:
         items:
           $ref: '#/definitions/model.Stage'
         type: array
+      teamLeader:
+        $ref: '#/definitions/model.User'
       title:
         type: string
       updatedAt:
@@ -139,26 +141,26 @@ definitions:
         type: integer
       name:
         type: string
+      subjects:
+        items:
+          $ref: '#/definitions/model.Subject'
+        type: array
       token:
         type: string
       updatedAt:
         type: string
-      user:
-        items:
-          $ref: '#/definitions/model.Subject'
-        type: array
     type: object
   request.IssueCreateRequest:
     properties:
       assignieID:
-        type: integer
-      creatorID:
         type: integer
       description:
         type: string
       issueForeignId:
         type: string
       parentIssueID:
+        type: integer
+      reporterID:
         type: integer
       status:
         type: integer
@@ -234,8 +236,6 @@ definitions:
         type: integer
       createdAt:
         type: string
-      creatorID:
-        type: integer
       dependentIssues:
         items:
           $ref: '#/definitions/response.LeafIssueResponse'
@@ -251,6 +251,8 @@ definitions:
           $ref: '#/definitions/response.LeafIssueResponse'
         type: array
       parentIssueID:
+        type: integer
+      reporterID:
         type: integer
       status:
         $ref: '#/definitions/response.StatusResponse'
@@ -271,8 +273,6 @@ definitions:
         type: integer
       createdAt:
         type: string
-      creatorID:
-        type: integer
       description:
         type: string
       id:
@@ -280,6 +280,8 @@ definitions:
       issueForeignID:
         type: string
       parentIssueID:
+        type: integer
+      reporterID:
         type: integer
       status:
         $ref: '#/definitions/response.StatusResponse'
@@ -466,9 +468,6 @@ paths:
         name: assignieID
         type: integer
       - in: query
-        name: creatorID
-        type: integer
-      - in: query
         name: getOnlyOrphans
         type: boolean
       - in: query
@@ -478,13 +477,13 @@ paths:
         name: projectID
         type: integer
       - in: query
+        name: reporterID
+        type: integer
+      - in: query
         name: status
         type: integer
       - in: query
         name: subjectID
-        type: integer
-      - in: query
-        name: userID
         type: integer
       produces:
       - application/json
@@ -563,9 +562,6 @@ paths:
         name: assignieID
         type: integer
       - in: query
-        name: creatorID
-        type: integer
-      - in: query
         name: getOnlyOrphans
         type: boolean
       - in: query
@@ -575,13 +571,13 @@ paths:
         name: projectID
         type: integer
       - in: query
+        name: reporterID
+        type: integer
+      - in: query
         name: status
         type: integer
       - in: query
         name: subjectID
-        type: integer
-      - in: query
-        name: userID
         type: integer
       produces:
       - application/json

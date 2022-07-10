@@ -6,10 +6,11 @@ import (
 	"github.com/DEONSKY/go-sandbox/model"
 )
 
-func InsertProject(project model.Project) model.Project {
-	config.DB.Save(&project)
-	//config.DB.Preload("User").Find(&issue)
-	return project
+func InsertProject(project model.Project) (*model.Project, error) {
+	if result := config.DB.Save(&project); result.Error != nil {
+		return nil, result.Error
+	}
+	return &project, nil
 }
 
 func GetProjectsBySubjectIds(userIDs []uint64) ([]response.ProjectNavTreeResponse, error) {

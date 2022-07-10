@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/DEONSKY/go-sandbox/service"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,15 +23,19 @@ import (
 // @Router /api/project [post]
 func InsertProject(context *fiber.Ctx) error {
 	var projectCreateDTO request.ProjectCreateRequest
-	log.Println("Here")
-	errDTO := context.BodyParser(&projectCreateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+
+	userID := context.Locals("user_id").(uint64)
+	err := context.BodyParser(&projectCreateDTO)
+	if err != nil {
+		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request DTO Parse Problem", []string{err.Error()})
 	}
-	log.Println("Here")
-	result := service.CreateProject(projectCreateDTO)
-	response := helper.BuildResponse(true, "OK", result)
+
+	projectCreateDTO.ProjectLeaderID = userID
+	result, err := service.CreateProject(projectCreateDTO)
+	if err != nil {
+		return err
+	}
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusCreated).JSON(response)
 
 }
@@ -49,17 +52,13 @@ func InsertProject(context *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /api/project/sidenav-options/{user_id} [get]
 func GetProjectsByUserId(context *fiber.Ctx) error {
-	user_id, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
-	log.Println(user_id)
+	userID := context.Locals("user_id").(uint64)
+	result, err := service.GetProjectsByUserId(userID)
+
 	if err != nil {
-		res := helper.BuildErrorResponse("Wrong UserID Parameter", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return err
 	}
-	result, err := service.GetProjectsByUserId(user_id)
-	if err != nil {
-		res := helper.BuildErrorResponse("Something went wrong while search", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
-	}
-	response := helper.BuildResponse(true, "OK", result)
+
+	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusOK).JSON(response)
 }

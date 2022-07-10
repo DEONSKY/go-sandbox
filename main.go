@@ -32,7 +32,11 @@ var (
 // @in header
 // @name Authorization
 func main() {
-
+	errEnv := godotenv.Load()
+	if errEnv != nil {
+		panic("Failed to load env file")
+	}
+	config.LoadEnvVariables()
 	defer config.CloseDatabaseConnection(db)
 
 	fmt.Println("Go ORM Tutorial")
@@ -40,10 +44,7 @@ func main() {
 	//r := gin.Default()
 
 	app := router.New()
-	errEnv := godotenv.Load()
-	if errEnv != nil {
-		panic("Failed to load env file")
-	}
+
 	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
 
 	server := socketio.NewServer(nil)

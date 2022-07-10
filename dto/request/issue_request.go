@@ -18,16 +18,15 @@ type IssueCreateRequest struct {
 	TargetTime     uint32  `json:"targetTime"`
 	Status         uint8   `json:"status"`
 	SubjectID      uint64  `json:"subjectID" form:"subjectID" binding:"required"`
-	CreatorID      uint64  `json:"creatorID,omitempty"  form:"creatorID,omitempty`
+	ReporterID     uint64  `json:"reporterID,omitempty"  form:"reporterID,omitempty`
 	AssignieID     *uint64 `json:"assignieID,omitempty"  form:"assignieID,omitempty`
 	ParentIssueID  *uint64 `json:"parentIssueID,omitempty"  form:"parentIssueID,omitempty"`
 }
 
 type IssueGetQuery struct {
-	UserID         *uint64 `query:"userID"`
 	SubjectID      *uint64 `query:"subjectID"`
 	ProjectID      *uint64 `query:"projectID"`
-	CreatorID      *uint64 `query:"creatorID"`
+	ReporterID     *uint64 `query:"reporterID"`
 	AssignieID     *uint64 `query:"assignieID"`
 	Status         *uint8  `query:"status"`
 	ParentIssueID  *uint64 `query:"parentIssueID"`

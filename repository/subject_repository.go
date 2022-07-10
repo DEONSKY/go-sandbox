@@ -10,7 +10,6 @@ func InsertSubject(subject model.Subject) (*model.Subject, error) {
 	if result := config.DB.Save(&subject); result.Error != nil {
 		return nil, result.Error
 	}
-
 	return &subject, nil
 }
 

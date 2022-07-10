@@ -17,7 +17,7 @@ type IssueResponse struct {
 	StatusID        uint32               `json:"statusID"`
 	Status          StatusResponse       `gorm:"-" json:"status"`
 	SubjectID       uint64               `json:"subjectID"`
-	CreatorID       uint64               `json:"creatorID"`
+	ReporterID      uint64               `json:"reporterID"`
 	AssignieID      *uint64              `json:"assignieID"`
 	ParentIssueID   *uint64              `json:"parentIssueID"`
 	ChildIssues     []*LeafIssueResponse `gorm:"foreignkey:ParentIssueID;" json:"issues"`
@@ -36,7 +36,7 @@ type LeafIssueResponse struct {
 	Status         StatusResponse `gorm:"-" json:"status"`
 	ParentIssueID  *uint64        `json:"parentIssueID"`
 	SubjectID      uint64         `json:"subjectID"`
-	CreatorID      uint64         `json:"creatorID"`
+	ReporterID     uint64         `json:"reporterID"`
 	AssignieID     *uint64        `json:"assignieID"`
 	CreatedAt      time.Time      `json:"createdAt"`
 	UpdatedAt      time.Time      `json:"updatedAt"`
