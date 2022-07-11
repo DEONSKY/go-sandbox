@@ -12,14 +12,14 @@ type BookUpdateDTO struct {
 
 //BookCreateDTO is a model that clinet use when create a new book
 type IssueCreateRequest struct {
-	Title          string  `json:"title" form:"title" binding:"required"`
-	Description    string  `json:"description" form:"description" binding:"required"`
+	Title          string  `json:"title" form:"title" validate:"required,max=32"`
+	Description    string  `json:"description" form:"description" validate:"required,max=255"`
 	IssueForeignId string  `json:"issueForeignId"`
 	TargetTime     uint32  `json:"targetTime"`
-	Status         uint8   `json:"status"`
-	SubjectID      uint64  `json:"subjectID" form:"subjectID" binding:"required"`
-	ReporterID     uint64  `json:"reporterID,omitempty"  form:"reporterID,omitempty`
-	AssignieID     *uint64 `json:"assignieID,omitempty"  form:"assignieID,omitempty`
+	Status         uint8   `json:"status" validate:"numeric"`
+	SubjectID      uint64  `json:"subjectID" form:"subjectID" validate:"required"`
+	ReporterID     uint64  `json:"reporterID,omitempty"  form:"reporterID,omitempty"`
+	AssignieID     *uint64 `json:"assignieID,omitempty"  form:"assignieID,omitempty"`
 	ParentIssueID  *uint64 `json:"parentIssueID,omitempty"  form:"parentIssueID,omitempty"`
 }
 

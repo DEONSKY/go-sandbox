@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/DEONSKY/go-sandbox/service"
@@ -30,13 +28,18 @@ func InsertProject(context *fiber.Ctx) error {
 		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request DTO Parse Problem", []string{err.Error()})
 	}
 
+	errors := utils.ValidateStruct(projectCreateDTO)
+	if errors != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Validation error", errors)
+	}
+
 	projectCreateDTO.ProjectLeaderID = userID
 	result, err := service.CreateProject(projectCreateDTO)
 	if err != nil {
 		return err
 	}
 	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusCreated).JSON(response)
+	return context.Status(fiber.StatusCreated).JSON(response)
 
 }
 
@@ -59,6 +62,6 @@ func GetProjectsByUserId(context *fiber.Ctx) error {
 		return err
 	}
 
-	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusOK).JSON(response)
+	response := helper.BuildShortResponse(result)
+	return context.Status(fiber.StatusOK).JSON(response)
 }

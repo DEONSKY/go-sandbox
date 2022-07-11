@@ -1,7 +1,7 @@
 package helper
 
 type Response struct {
-	Message string      `json:"message"`
+	Message interface{} `json:"message"`
 	Errors  interface{} `json:"errors"`
 	Data    interface{} `json:"data"`
 }
@@ -11,6 +11,15 @@ type EmptyObj struct{}
 func BuildResponse(message string, data interface{}) Response {
 	res := Response{
 		Message: message,
+		Errors:  nil,
+		Data:    data,
+	}
+	return res
+}
+
+func BuildShortResponse(data interface{}) Response {
+	res := Response{
+		Message: nil,
 		Errors:  nil,
 		Data:    data,
 	}

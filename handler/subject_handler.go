@@ -30,6 +30,12 @@ func InsertSubject(context *fiber.Ctx) error {
 	if err != nil {
 		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Request DTO Parse Problem", []string{err.Error()})
 	}
+
+	errors := utils.ValidateStruct(subjectCreateDTO)
+	if errors != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Validation error", errors)
+	}
+
 	userID := context.Locals("user_id").(uint64)
 	subjectCreateDTO.TeamLeaderID = userID
 	result, err := service.CreateSubject(subjectCreateDTO, userID)
@@ -54,6 +60,7 @@ func InsertSubject(context *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Router /api/subject/{subject_id}/{user_id} [put]
 func InsertUserToSubject(context *fiber.Ctx) error {
+	userID := context.Locals("user_id").(uint64)
 	subject_id, err := strconv.ParseUint(context.Params("subject_id"), 10, 64)
 	log.Println(subject_id)
 	if err != nil {
@@ -64,11 +71,37 @@ func InsertUserToSubject(context *fiber.Ctx) error {
 	if err != nil {
 		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Wrong UserID Parameter", []string{err.Error()})
 	}
-	result, err := service.InsertUserToSubject(subject_id, user_id)
+	result, err := service.InsertUserToSubjectIfAllowed(subject_id, user_id, userID)
 	if err != nil {
 		return err
 	}
 
 	response := helper.BuildResponse("OK", result)
 	return context.Status(http.StatusCreated).JSON(response)
+}
+
+// Get Subjects User Options
+// @Summary Gets subject user options by subject id
+// @Description Gets subject user options by subject id
+// @Tags Subject
+// @Accept json
+// @Produce json
+// @Param subject_id path string true "Subject ID"
+// @Success 200 {object} helper.Response{data=response.UserOptionResponse}
+// @Failure 400 {object} helper.Response{}
+// @Security ApiKeyAuth
+// @Router /api/subject/user-options/{subject_id}} [get]
+func GetSubjectsUsersOptions(context *fiber.Ctx) error {
+	userID := context.Locals("user_id").(uint64)
+	subject_id, err := strconv.ParseUint(context.Params("subject_id"), 10, 64)
+	log.Println(subject_id)
+	if err != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Wrong SubjectID Parameter", []string{err.Error()})
+	}
+	result, err := service.GetSubjectsUsersOptions(subject_id, userID)
+	if err != nil {
+		return err
+	}
+	response := helper.BuildShortResponse(result)
+	return context.Status(http.StatusOK).JSON(response)
 }

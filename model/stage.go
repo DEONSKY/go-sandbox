@@ -12,8 +12,8 @@ type Stage struct {
 	Title       string         `gorm:"type:varchar(255)" json:"title"`
 	Description string         `gorm:"type:text" json:"description"`
 	ProjectId   uint64         `json:"-"`
-	StartTime   time.Time      `json:startTime`
-	EndTime     time.Time      `json:endTime`
+	StartTime   time.Time      `json:"startTime"`
+	EndTime     time.Time      `json:"endTime"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt `json:"-"`

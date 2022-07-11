@@ -45,13 +45,15 @@ func New() *fiber.App {
 	authRoutes.Post("/login", authHandler.Login)
 	authRoutes.Post("/register", authHandler.Register)
 
-	bookRoutes := root.Group("/books", middleware.Protected())
+	/*
+		bookRoutes := root.Group("/books", middleware.Protected())
 
-	bookRoutes.Get("/", bookHandler.All)
-	bookRoutes.Post("/", bookHandler.Insert)
-	bookRoutes.Get("/:id", bookHandler.FindByID)
-	bookRoutes.Put("/:id", bookHandler.Update)
-	bookRoutes.Delete("/:id", bookHandler.Delete)
+		bookRoutes.Get("/", bookHandler.All)
+		bookRoutes.Post("/", bookHandler.Insert)
+		bookRoutes.Get("/:id", bookHandler.FindByID)
+		bookRoutes.Put("/:id", bookHandler.Update)
+		bookRoutes.Delete("/:id", bookHandler.Delete)
+	*/
 
 	issueRoutes := root.Group("/issue", middleware.Protected())
 	issueRoutes.Post("/", handler.InsertIssue)
@@ -60,6 +62,9 @@ func New() *fiber.App {
 	issueRoutes.Put("/add-issue-dependency/:issue_id/:dependent_issue_id", handler.InsertDependentIssueAssociation)
 	issueRoutes.Put("/assignie-user/:issue_id/:user_id", handler.AssignieIssueToUser)
 
+	issueCommentRoutes := root.Group("/issue-comment", middleware.Protected())
+	issueCommentRoutes.Post("/", handler.AddIssueComment)
+
 	projectRoutes := root.Group("/project", middleware.Protected())
 	projectRoutes.Post("/", handler.InsertProject)
 	projectRoutes.Get("/sidenav-options/", handler.GetProjectsByUserId)
@@ -67,6 +72,7 @@ func New() *fiber.App {
 	subjectRoutes := root.Group("/subject", middleware.Protected())
 	subjectRoutes.Post("/", handler.InsertSubject)
 	subjectRoutes.Put("/:subject_id/:user_id", handler.InsertUserToSubject)
+	subjectRoutes.Get("/user-options/:subject_id", handler.GetSubjectsUsersOptions)
 
 	return app
 }

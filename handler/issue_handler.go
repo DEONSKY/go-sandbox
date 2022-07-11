@@ -2,7 +2,6 @@ package handler
 
 import (
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/DEONSKY/go-sandbox/dto/request"
@@ -32,6 +31,11 @@ func InsertIssue(context *fiber.Ctx) error {
 		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request DTO Parse Problem", []string{errDTO.Error()})
 	}
 
+	errors := utils.ValidateStruct(IssueCreateDTO)
+	if errors != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Validation error", errors)
+	}
+
 	IssueCreateDTO.ReporterID = userID
 
 	result, err := service.CreateIssue(IssueCreateDTO)
@@ -39,7 +43,7 @@ func InsertIssue(context *fiber.Ctx) error {
 		return err
 	}
 	response := helper.BuildResponse("Issue created succesfully", result)
-	return context.Status(http.StatusCreated).JSON(response)
+	return context.Status(fiber.StatusCreated).JSON(response)
 
 }
 
@@ -69,8 +73,8 @@ func GetIssues(context *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusOK).JSON(response)
+	response := helper.BuildShortResponse(result)
+	return context.Status(fiber.StatusOK).JSON(response)
 }
 
 // GetIssuesKanban is a function to get all issues data from database with dynamic query parameters as Kanban format
@@ -100,8 +104,8 @@ func GetIssuesKanban(context *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusOK).JSON(response)
+	response := helper.BuildShortResponse(result)
+	return context.Status(fiber.StatusOK).JSON(response)
 }
 
 // InsertDependentIssueAssociation adds assocation between issue and dependent issue
@@ -136,7 +140,7 @@ func InsertDependentIssueAssociation(context *fiber.Ctx) error {
 	}
 
 	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusCreated).JSON(response)
+	return context.Status(fiber.StatusCreated).JSON(response)
 }
 
 // AssignieIssueToUser adds assocation between issue and assigned user
@@ -158,13 +162,13 @@ func AssignieIssueToUser(context *fiber.Ctx) error {
 	log.Println(issueID)
 	if err != nil {
 		res := helper.BuildErrorResponse("Wrong Issue Parameter", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return context.Status(fiber.StatusBadRequest).JSON(res)
 	}
 	assignieID, err := strconv.ParseUint(context.Params("user_id"), 10, 64)
 	log.Println(assignieID)
 	if err != nil {
 		res := helper.BuildErrorResponse("Wrong User Parameter", err.Error(), helper.EmptyObj{})
-		return context.Status(http.StatusBadRequest).JSON(res)
+		return context.Status(fiber.StatusBadRequest).JSON(res)
 	}
 	log.Println("here")
 	result, err := service.AssignieIssueToUser(issueID, assignieID, userID)
@@ -173,5 +177,5 @@ func AssignieIssueToUser(context *fiber.Ctx) error {
 	}
 
 	response := helper.BuildResponse("OK", result)
-	return context.Status(http.StatusCreated).JSON(response)
+	return context.Status(fiber.StatusCreated).JSON(response)
 }

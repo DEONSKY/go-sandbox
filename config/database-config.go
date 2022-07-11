@@ -37,7 +37,6 @@ func SetupDatabaseConnection() *gorm.DB {
 		&model.User{},
 		&model.Project{},
 		&model.Subject{},
-		&model.Book{},
 		&model.Issue{},
 		&model.IssueComment{},
 		&model.Stage{},

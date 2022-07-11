@@ -8,6 +8,7 @@ import (
 	"github.com/DEONSKY/go-sandbox/helper"
 	"github.com/DEONSKY/go-sandbox/model"
 	"github.com/DEONSKY/go-sandbox/service"
+	"github.com/DEONSKY/go-sandbox/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -62,8 +63,14 @@ func (c *authController) Login(ctx *gin.Context) {
 func (c *authHandler) Login(ctx *fiber.Ctx) error {
 	var loginDTO request.LoginRequest
 	if err := ctx.BodyParser(&loginDTO); err != nil {
-		return ctx.SendStatus(fiber.StatusUnauthorized)
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Request is incorrect", []string{})
 	}
+
+	errors := utils.ValidateStruct(loginDTO)
+	if errors != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Validation error", errors)
+	}
+
 	authResult := service.VerifyCredential(loginDTO.Email, loginDTO.Password)
 	if v, ok := authResult.(model.User); ok {
 		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10))
@@ -72,9 +79,7 @@ func (c *authHandler) Login(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusOK).JSON(response)
 
 	}
-	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
-	return ctx.Status(http.StatusUnauthorized).JSON(response)
-
+	return utils.ReturnErrorResponse(fiber.StatusUnauthorized, "Please check again your credential", []string{"Invalid Credential"})
 }
 
 // Register
@@ -91,13 +96,16 @@ func (c *authHandler) Register(ctx *fiber.Ctx) error {
 	var registerDTO request.RegisterRequest
 	errDTO := ctx.BodyParser(&registerDTO)
 	if errDTO != nil {
-		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		return ctx.Status(http.StatusBadRequest).JSON(response)
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Failed to process request", []string{errDTO.Error()})
+	}
+
+	errors := utils.ValidateStruct(registerDTO)
+	if errors != nil {
+		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Validation error", errors)
 	}
 
 	if !service.IsDuplicateEmail(registerDTO.Email) {
-		response := helper.BuildErrorResponse("Failed to process request", "Duplicate email", helper.EmptyObj{})
-		return ctx.Status(http.StatusConflict).JSON(response)
+		return utils.ReturnErrorResponse(fiber.StatusConflict, "Duplicate email", []string{})
 	} else {
 		createdUser := service.CreateUser(registerDTO)
 		token := c.jwtService.GenerateToken(strconv.FormatUint(createdUser.ID, 10))

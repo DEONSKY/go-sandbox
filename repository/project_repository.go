@@ -13,6 +13,16 @@ func InsertProject(project model.Project) (*model.Project, error) {
 	return &project, nil
 }
 
+func ProjectExistsByIDAndLeaderID(projectId uint64, projectLeaderId uint64) (bool, error) {
+	exists := false
+	if result := config.DB.Model(model.Project{}).Select("count(*) > 0").
+		Where("id= ? AND project_leader_id = ?", projectId, projectLeaderId).
+		Find(&exists); result.Error != nil {
+		return false, result.Error
+	}
+	return exists, nil
+}
+
 func GetProjectsBySubjectIds(userIDs []uint64) ([]response.ProjectNavTreeResponse, error) {
 	var projectNavTreeResponse []response.ProjectNavTreeResponse
 	if result := config.DB.Model(&model.Project{}).

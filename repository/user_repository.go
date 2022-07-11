@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/DEONSKY/go-sandbox/config"
+	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -69,4 +70,14 @@ func FindUser(user_id uint64) (*model.User, error) {
 		return nil, result.Error
 	}
 	return &user, nil
+}
+
+func GetSubjectsUsersOptions(subjectID uint64) ([]response.UserOptionResponse, error) {
+	var userOptions []response.UserOptionResponse
+	if result := config.DB.Model(model.User{}).
+		Joins("INNER JOIN subject_users su on su.user_id = id").
+		Where("subject_id", subjectID).Find(&userOptions); result.Error != nil {
+		return nil, result.Error
+	}
+	return userOptions, nil
 }

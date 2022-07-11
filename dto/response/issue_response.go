@@ -9,17 +9,18 @@ type IssueKanbanResponse struct {
 	Issues []IssueResponse `json:"issues"`
 }
 type IssueResponse struct {
-	ID              uint64               `json:"id"`
-	Title           string               `json:"title"`
-	Description     string               `json:"description"`
-	IssueForeignId  string               `json:"issueForeignID"`
-	TargetTime      uint32               `json:"targetTime"`
-	StatusID        uint32               `json:"statusID"`
-	Status          StatusResponse       `gorm:"-" json:"status"`
-	SubjectID       uint64               `json:"subjectID"`
-	ReporterID      uint64               `json:"reporterID"`
-	AssignieID      *uint64              `json:"assignieID"`
-	ParentIssueID   *uint64              `json:"parentIssueID"`
+	ID             uint64         `json:"id"`
+	Title          string         `json:"title"`
+	Description    string         `json:"description"`
+	IssueForeignId string         `json:"issueForeignID"`
+	TargetTime     uint32         `json:"targetTime"`
+	StatusID       uint32         `json:"statusID"`
+	Status         StatusResponse `gorm:"-" json:"status"`
+	SubjectID      uint64         `json:"subjectID"`
+	ReporterID     uint64         `json:"reporterID"`
+	AssignieID     *uint64        `json:"assignieID"`
+	ParentIssueID  *uint64        `json:"parentIssueID"`
+	//Comments        []*IssueCommentResponse `gorm:"foreignkey:IssueID;" json:"issueComments"`
 	ChildIssues     []*LeafIssueResponse `gorm:"foreignkey:ParentIssueID;" json:"issues"`
 	DependentIssues []*LeafIssueResponse `gorm:"many2many:DependentIssues;foreignkey:ID;joinForeignKey:issueID;References:ID;joinReferences:dependentIssueID" json:"dependentIssues"`
 	CreatedAt       time.Time            `json:"createdAt"`
@@ -45,6 +46,16 @@ type LeafIssueResponse struct {
 // TableName overrides the table name for smart select
 func (LeafIssueResponse) TableName() string {
 	return "issues"
+}
+
+type IssueCommentResponse struct {
+	Context   string `json:"context"`
+	IssueID   uint64 `json:"issueID"`
+	CreatorID uint64 `json:"-"`
+}
+
+func (IssueCommentResponse) TableName() string {
+	return "issue_comments"
 }
 
 type StatusResponse struct {

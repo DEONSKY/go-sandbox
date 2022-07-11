@@ -24,7 +24,7 @@ func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.
 	var issues []response.IssueResponse
 	var queryParams []string
 	queryParams = append(queryParams, "subject_id IN (@user_id)")
-	chain := config.DB.Model(&model.Issue{}).Preload("ChildIssues").Preload("DependentIssues")
+	chain := config.DB.Model(&model.Issue{}).Preload("ChildIssues").Preload("DependentIssues") //.Preload("Comments")
 
 	var queryCount uint8
 	if issueGetQuery.ReporterID != nil {
@@ -101,14 +101,14 @@ func FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error) {
 }
 
 func InsertDependentIssueAssociation(issue model.Issue, dependentIssue model.Issue) (*model.Issue, error) {
-	if err := config.DB.Model(&issue).Association("DependentIssues").Append(&dependentIssue); err != nil {
+	if err := config.DB.Model(&issue).Omit("DependentIssues.*").Association("DependentIssues").Append(&dependentIssue); err != nil {
 		return nil, err
 	}
 	return &issue, nil
 }
 
 func AssignieIssueToUser(issue model.Issue, user model.User) (*model.Issue, error) {
-	if err := config.DB.Model(&issue).Association("Assignie").Append(&user); err != nil {
+	if err := config.DB.Model(&issue).Omit("Assignie").Association("Assignie").Append(&user); err != nil {
 		return nil, err
 	}
 	return &issue, nil

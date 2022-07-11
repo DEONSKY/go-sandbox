@@ -397,6 +397,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/issue-comment": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Creates new IssueComment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IssueComments"
+                ],
+                "summary": "Create new IssueComment",
+                "parameters": [
+                    {
+                        "description": "createIssues",
+                        "name": "Issue",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.IssueCommentCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.IssueComment"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/helper.EmptyObj"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/issue/kanban": {
             "get": {
                 "security": [
@@ -682,6 +751,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/subject/user-options/{subject_id}}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Gets subject user options by subject id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subject"
+                ],
+                "summary": "Gets subject user options by subject id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "subject_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/helper.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UserOptionResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helper.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/subject/{subject_id}/{user_id}": {
             "put": {
                 "security": [
@@ -857,31 +981,14 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "errors": {},
-                "message": {
-                    "type": "string"
-                }
+                "message": {}
             }
         },
         "model.Issue": {
             "type": "object",
             "properties": {
-                "assignie": {
-                    "$ref": "#/definitions/model.User"
-                },
-                "comments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.IssueComment"
-                    }
-                },
                 "createdAt": {
                     "type": "string"
-                },
-                "dependentIssues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Issue"
-                    }
                 },
                 "description": {
                     "type": "string"
@@ -892,29 +999,17 @@ const docTemplate = `{
                 "issueForeignId": {
                     "type": "string"
                 },
-                "issues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Issue"
-                    }
-                },
-                "p": {
+                "parentIssueID": {
                     "type": "integer"
                 },
                 "progress": {
                     "type": "integer"
-                },
-                "reporter": {
-                    "$ref": "#/definitions/model.User"
                 },
                 "spendingTime": {
                     "type": "integer"
                 },
                 "status": {
                     "type": "integer"
-                },
-                "subject": {
-                    "$ref": "#/definitions/model.Subject"
                 },
                 "targetTime": {
                     "type": "integer"
@@ -936,9 +1031,6 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
-                "creator": {
-                    "$ref": "#/definitions/model.User"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -958,41 +1050,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "projectLeader": {
-                    "$ref": "#/definitions/model.User"
-                },
-                "subjects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Subject"
-                    }
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.Stage": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endTime": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "startTime": {
-                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -1014,38 +1071,14 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "issues": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Issue"
-                    }
-                },
-                "project": {
-                    "$ref": "#/definitions/model.Project"
-                },
                 "repoId": {
                     "type": "string"
-                },
-                "stages": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Stage"
-                    }
-                },
-                "teamLeader": {
-                    "$ref": "#/definitions/model.User"
                 },
                 "title": {
                     "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
-                },
-                "user": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.User"
-                    }
                 }
             }
         },
@@ -1078,6 +1111,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.IssueCommentCreateRequest": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "string"
+                },
+                "issueID": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.IssueCreateRequest": {
             "type": "object",
             "required": [
@@ -1090,7 +1134,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "issueForeignId": {
                     "type": "string"
@@ -1111,7 +1156,8 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 }
             }
         },
@@ -1138,10 +1184,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 }
             }
         },
@@ -1157,10 +1205,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 8
                 }
             }
         },
@@ -1173,13 +1224,15 @@ const docTemplate = `{
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 255
                 },
                 "projectID": {
                     "type": "integer"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 32
                 }
             }
         },
@@ -1222,6 +1275,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "issues": {
+                    "description": "Comments        []*IssueCommentResponse ` + "`" + `gorm:\"foreignkey:IssueID;\" json:\"issueComments\"` + "`" + `",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/response.LeafIssueResponse"
@@ -1344,6 +1398,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.UserOptionResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

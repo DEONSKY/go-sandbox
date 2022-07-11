@@ -14,7 +14,7 @@ func InsertSubject(subject model.Subject) (*model.Subject, error) {
 }
 
 func InsertUserToSubject(subject model.Subject, user model.User) (*model.Subject, error) {
-	if err := config.DB.Model(&subject).Association("User").Append(&user); err != nil {
+	if err := config.DB.Model(&subject).Omit("User.*").Association("User").Append(&user); err != nil {
 		return nil, err
 	}
 	return &subject, nil
@@ -22,7 +22,7 @@ func InsertUserToSubject(subject model.Subject, user model.User) (*model.Subject
 
 func FindSubject(subjet_id uint64) (*model.Subject, error) {
 	var subject model.Subject
-	if result := config.DB.First(&subject, subjet_id); result.Error != nil {
+	if result := config.DB.Select("ID", "ProjectID").Take(&subject, subjet_id); result.Error != nil {
 		return nil, result.Error
 	}
 	return &subject, nil

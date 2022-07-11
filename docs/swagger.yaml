@@ -5,45 +5,26 @@ definitions:
     properties:
       data: {}
       errors: {}
-      message:
-        type: string
+      message: {}
     type: object
   model.Issue:
     properties:
-      assignie:
-        $ref: '#/definitions/model.User'
-      comments:
-        items:
-          $ref: '#/definitions/model.IssueComment'
-        type: array
       createdAt:
         type: string
-      dependentIssues:
-        items:
-          $ref: '#/definitions/model.Issue'
-        type: array
       description:
         type: string
       id:
         type: integer
       issueForeignId:
         type: string
-      issues:
-        items:
-          $ref: '#/definitions/model.Issue'
-        type: array
-      p:
+      parentIssueID:
         type: integer
       progress:
         type: integer
-      reporter:
-        $ref: '#/definitions/model.User'
       spendingTime:
         type: integer
       status:
         type: integer
-      subject:
-        $ref: '#/definitions/model.Subject'
       targetTime:
         type: integer
       title:
@@ -57,8 +38,6 @@ definitions:
         type: string
       createdAt:
         type: string
-      creator:
-        $ref: '#/definitions/model.User'
       id:
         type: integer
       updatedAt:
@@ -72,29 +51,6 @@ definitions:
         type: string
       id:
         type: integer
-      projectLeader:
-        $ref: '#/definitions/model.User'
-      subjects:
-        items:
-          $ref: '#/definitions/model.Subject'
-        type: array
-      title:
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  model.Stage:
-    properties:
-      createdAt:
-        type: string
-      description:
-        type: string
-      endTime:
-        type: string
-      id:
-        type: integer
-      startTime:
-        type: string
       title:
         type: string
       updatedAt:
@@ -108,28 +64,12 @@ definitions:
         type: string
       id:
         type: integer
-      issues:
-        items:
-          $ref: '#/definitions/model.Issue'
-        type: array
-      project:
-        $ref: '#/definitions/model.Project'
       repoId:
         type: string
-      stages:
-        items:
-          $ref: '#/definitions/model.Stage'
-        type: array
-      teamLeader:
-        $ref: '#/definitions/model.User'
       title:
         type: string
       updatedAt:
         type: string
-      user:
-        items:
-          $ref: '#/definitions/model.User'
-        type: array
     type: object
   model.User:
     properties:
@@ -150,11 +90,19 @@ definitions:
       updatedAt:
         type: string
     type: object
+  request.IssueCommentCreateRequest:
+    properties:
+      context:
+        type: string
+      issueID:
+        type: integer
+    type: object
   request.IssueCreateRequest:
     properties:
       assignieID:
         type: integer
       description:
+        maxLength: 255
         type: string
       issueForeignId:
         type: string
@@ -169,6 +117,7 @@ definitions:
       targetTime:
         type: integer
       title:
+        maxLength: 32
         type: string
     required:
     - description
@@ -188,8 +137,10 @@ definitions:
   request.ProjectCreateRequest:
     properties:
       description:
+        maxLength: 255
         type: string
       title:
+        maxLength: 32
         type: string
     required:
     - description
@@ -200,8 +151,11 @@ definitions:
       email:
         type: string
       name:
+        maxLength: 32
         type: string
       password:
+        maxLength: 32
+        minLength: 8
         type: string
     required:
     - email
@@ -211,10 +165,12 @@ definitions:
   request.SubjectCreateRequest:
     properties:
       description:
+        maxLength: 255
         type: string
       projectID:
         type: integer
       title:
+        maxLength: 32
         type: string
     required:
     - description
@@ -247,6 +203,8 @@ definitions:
       issueForeignID:
         type: string
       issues:
+        description: Comments        []*IssueCommentResponse `gorm:"foreignkey:IssueID;"
+          json:"issueComments"`
         items:
           $ref: '#/definitions/response.LeafIssueResponse'
         type: array
@@ -327,6 +285,13 @@ definitions:
       project_id:
         type: integer
       title:
+        type: string
+    type: object
+  response.UserOptionResponse:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
 info:
@@ -552,6 +517,44 @@ paths:
       summary: Create new Issue
       tags:
       - Issues
+  /api/issue-comment:
+    post:
+      consumes:
+      - application/json
+      description: Creates new IssueComment
+      parameters:
+      - description: createIssues
+        in: body
+        name: Issue
+        required: true
+        schema:
+          $ref: '#/definitions/request.IssueCommentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.IssueComment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/helper.EmptyObj'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create new IssueComment
+      tags:
+      - IssueComments
   /api/issue/kanban:
     get:
       consumes:
@@ -749,6 +752,38 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Creates subject - user many2many association
+      tags:
+      - Subject
+  /api/subject/user-options/{subject_id}}:
+    get:
+      consumes:
+      - application/json
+      description: Gets subject user options by subject id
+      parameters:
+      - description: Subject ID
+        in: path
+        name: subject_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserOptionResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Gets subject user options by subject id
       tags:
       - Subject
   /assignie-user/{issue_id}/{user_id}:

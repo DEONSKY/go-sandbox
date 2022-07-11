@@ -12,8 +12,8 @@ type Project struct {
 	Title           string         `gorm:"type:varchar(255)" json:"title"`
 	Description     string         `gorm:"type:text" json:"description"`
 	ProjectLeaderID uint64         `gorm:"not null" json:"-"`
-	ProjectLeader   User           `gorm:"foreignkey:ProjectLeaderID;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"projectLeader"`
-	Subjects        []Subject      `json:"subjects"`
+	ProjectLeader   User           `gorm:"foreignkey:ProjectLeaderID;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"-"`
+	Subjects        []Subject      `json:"-"`
 	CreatedAt       time.Time      `json:"createdAt"`
 	UpdatedAt       time.Time      `json:"updatedAt"`
 	DeletedAt       gorm.DeletedAt `json:"-"`
