@@ -16,12 +16,15 @@ import (
 )
 
 var (
-	db             *gorm.DB                  = config.SetupDatabaseConnection()
-	bookRepository repository.BookRepository = repository.NewBookRepository(db)
-	jwtService     service.JWTService        = service.NewJWTService()
-	bookService    service.BookService       = service.NewBookService(bookRepository)
-	authHandler    handler.AuthHandler       = handler.NewAuthController(jwtService)
-	bookHandler    handler.BookHandler       = handler.NewBookController(bookService, jwtService)
+	db              *gorm.DB                   = config.SetupDatabaseConnection()
+	bookRepository  repository.BookRepository  = repository.NewBookRepository(db)
+	issueRepository repository.IssueRepository = repository.NewIssueRepository(db)
+	issueService    service.IssueService       = service.NewIssueService(issueRepository)
+	issueHandler    handler.IssueHandler       = handler.NewIssueHandler(issueService)
+	jwtService      service.JWTService         = service.NewJWTService()
+	bookService     service.BookService        = service.NewBookService(bookRepository)
+	authHandler     handler.AuthHandler        = handler.NewAuthController(jwtService)
+	bookHandler     handler.BookHandler        = handler.NewBookController(bookService, jwtService)
 )
 
 func New() *fiber.App {
@@ -56,11 +59,11 @@ func New() *fiber.App {
 	*/
 
 	issueRoutes := root.Group("/issue", middleware.Protected())
-	issueRoutes.Post("/", handler.InsertIssue)
-	issueRoutes.Get("/", handler.GetIssues)
-	issueRoutes.Get("/kanban/", handler.GetIssuesKanban)
-	issueRoutes.Put("/add-issue-dependency/:issue_id/:dependent_issue_id", handler.InsertDependentIssueAssociation)
-	issueRoutes.Put("/assignie-user/:issue_id/:user_id", handler.AssignieIssueToUser)
+	issueRoutes.Post("/", issueHandler.InsertIssue)
+	issueRoutes.Get("/", issueHandler.GetIssues)
+	issueRoutes.Get("/kanban/", issueHandler.GetIssuesKanban)
+	issueRoutes.Put("/add-issue-dependency/:issue_id/:dependent_issue_id", issueHandler.InsertDependentIssueAssociation)
+	issueRoutes.Put("/assignie-user/:issue_id/:user_id", issueHandler.AssignieIssueToUser)
 
 	issueCommentRoutes := root.Group("/issue-comment", middleware.Protected())
 	issueCommentRoutes.Post("/", handler.AddIssueComment)
@@ -74,5 +77,8 @@ func New() *fiber.App {
 	subjectRoutes.Put("/:subject_id/:user_id", handler.InsertUserToSubject)
 	subjectRoutes.Get("/user-options/:subject_id", handler.GetSubjectsUsersOptions)
 
+	app.Use(func(c *fiber.Ctx) error {
+		return utils.ReturnErrorResponse(404, "Service not exists", []string{})
+	})
 	return app
 }

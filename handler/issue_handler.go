@@ -22,7 +22,26 @@ import (
 // @Failure 400 {object} helper.Response{data=helper.EmptyObj}
 // @Security ApiKeyAuth
 // @Router /api/issue [post]
-func InsertIssue(context *fiber.Ctx) error {
+type IssueHandler interface {
+	InsertIssue(context *fiber.Ctx) error
+	GetIssues(context *fiber.Ctx) error
+	GetIssuesKanban(context *fiber.Ctx) error
+	InsertDependentIssueAssociation(context *fiber.Ctx) error
+	AssignieIssueToUser(context *fiber.Ctx) error
+}
+
+type issueHandler struct {
+	issueService service.IssueService
+}
+
+//NewBookController create a new instances of BoookController
+func NewIssueHandler(issueSer service.IssueService) IssueHandler {
+	return &issueHandler{
+		issueService: issueSer,
+	}
+}
+
+func (c *issueHandler) InsertIssue(context *fiber.Ctx) error {
 	userID := context.Locals("user_id").(uint64)
 	var IssueCreateDTO request.IssueCreateRequest
 
@@ -38,7 +57,7 @@ func InsertIssue(context *fiber.Ctx) error {
 
 	IssueCreateDTO.ReporterID = userID
 
-	result, err := service.CreateIssue(IssueCreateDTO)
+	result, err := c.issueService.CreateIssue(IssueCreateDTO)
 	if err != nil {
 		return err
 	}
@@ -58,7 +77,7 @@ func InsertIssue(context *fiber.Ctx) error {
 // @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
 // @Security ApiKeyAuth
 // @Router /api/issue [get]
-func GetIssues(context *fiber.Ctx) error {
+func (c *issueHandler) GetIssues(context *fiber.Ctx) error {
 	iq := new(request.IssueGetQuery)
 	userID := context.Locals("user_id").(uint64)
 
@@ -69,7 +88,7 @@ func GetIssues(context *fiber.Ctx) error {
 	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
 		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Error", []string{"An issue cannot be orphan and has parent at the same time"})
 	}
-	result, err := service.GetIssues(iq, userID)
+	result, err := c.issueService.GetIssues(iq, userID)
 	if err != nil {
 		return err
 	}
@@ -88,7 +107,7 @@ func GetIssues(context *fiber.Ctx) error {
 // @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
 // @Security ApiKeyAuth
 // @Router /api/issue/kanban [get]
-func GetIssuesKanban(context *fiber.Ctx) error {
+func (c *issueHandler) GetIssuesKanban(context *fiber.Ctx) error {
 	iq := new(request.IssueGetQuery)
 
 	userID := context.Locals("user_id").(uint64)
@@ -100,7 +119,7 @@ func GetIssuesKanban(context *fiber.Ctx) error {
 	if iq.GetOnlyOrphans != nil && iq.ParentIssueID != nil {
 		return utils.ReturnErrorResponse(fiber.StatusInternalServerError, "Request Error", []string{"An issue cannot be orphan and has parent at the same time"})
 	}
-	result, err := service.GetIssuesKanban(iq, userID)
+	result, err := c.issueService.GetIssuesKanban(iq, userID)
 	if err != nil {
 		return err
 	}
@@ -120,7 +139,7 @@ func GetIssuesKanban(context *fiber.Ctx) error {
 // @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
 // @Security ApiKeyAuth
 // @Router /add-issue-dependency/{issue_id}/{dependent_issue_id} [put]
-func InsertDependentIssueAssociation(context *fiber.Ctx) error {
+func (c *issueHandler) InsertDependentIssueAssociation(context *fiber.Ctx) error {
 	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
 	userID := context.Locals("user_id").(uint64)
 
@@ -134,7 +153,7 @@ func InsertDependentIssueAssociation(context *fiber.Ctx) error {
 		return utils.ReturnErrorResponse(fiber.StatusBadRequest, "Wrong dependent issue parameter", []string{err.Error()})
 	}
 
-	result, err := service.InsertDependentIssueAssociation(issueID, dependentIssueID, userID)
+	result, err := c.issueService.InsertDependentIssueAssociation(issueID, dependentIssueID, userID)
 	if err != nil {
 		return err
 	}
@@ -155,7 +174,7 @@ func InsertDependentIssueAssociation(context *fiber.Ctx) error {
 // @Failure 400 {object} helper.Response{data=[]helper.EmptyObj}
 // @Security ApiKeyAuth
 // @Router /assignie-user/{issue_id}/{user_id} [put]
-func AssignieIssueToUser(context *fiber.Ctx) error {
+func (c *issueHandler) AssignieIssueToUser(context *fiber.Ctx) error {
 	issueID, err := strconv.ParseUint(context.Params("issue_id"), 10, 64)
 	userID := context.Locals("user_id").(uint64)
 
@@ -171,7 +190,7 @@ func AssignieIssueToUser(context *fiber.Ctx) error {
 		return context.Status(fiber.StatusBadRequest).JSON(res)
 	}
 	log.Println("here")
-	result, err := service.AssignieIssueToUser(issueID, assignieID, userID)
+	result, err := c.issueService.AssignieIssueToUser(issueID, assignieID, userID)
 	if err != nil {
 		return err
 	}

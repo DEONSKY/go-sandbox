@@ -10,22 +10,42 @@ import (
 	"github.com/mashingan/smapping"
 )
 
-func CreateIssue(issueDto request.IssueCreateRequest) (*model.Issue, error) {
+type IssueService interface {
+	CreateIssue(issueDto request.IssueCreateRequest) (*model.Issue, error)
+	GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error)
+	GetIssuesKanban(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueKanbanResponse, error)
+	InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64, userID uint64) (*model.Issue, error)
+	AssignieIssueToUser(issueID uint64, assignieID uint64, userID uint64) (*model.Issue, error)
+}
+type issueService struct {
+	issueRepository repository.IssueRepository
+}
+
+func NewIssueService(issueRepo repository.IssueRepository) IssueService {
+	return &issueService{
+		issueRepository: issueRepo,
+	}
+}
+
+func (service *issueService) CreateIssue(issueDto request.IssueCreateRequest) (*model.Issue, error) {
 	issueToCreate := model.Issue{}
+	if issueDto.Status == 0 {
+		issueDto.Status = 1
+	}
 	err := smapping.FillStruct(&issueToCreate, smapping.MapFields(&issueDto))
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(400, "Request DTO Parse Problem", []string{err.Error()})
 	}
-	res, err := repository.InsertIssue(issueToCreate)
+	res, err := service.issueRepository.InsertIssue(issueToCreate)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(422, "Issue could not be inserted", []string{err.Error()})
 	}
 	return res, err
 }
 
-func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
+func (service *issueService) GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
 
-	res, err := repository.GetIssues(issueGetQuery, userID)
+	res, err := service.issueRepository.GetIssues(issueGetQuery, userID)
 
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(400, "Cannot get issues", []string{err.Error()})
@@ -43,9 +63,9 @@ func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.
 	return res, err
 }
 
-func GetIssuesKanban(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueKanbanResponse, error) {
+func (service *issueService) GetIssuesKanban(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueKanbanResponse, error) {
 
-	res, err := repository.GetIssues(issueGetQuery, userID)
+	res, err := service.issueRepository.GetIssues(issueGetQuery, userID)
 
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(400, "Cannot get issues", []string{err.Error()})
@@ -75,24 +95,24 @@ func GetIssuesKanban(issueGetQuery *request.IssueGetQuery, userID uint64) ([]res
 	return issueKanbanSlice, err
 }
 
-func InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64, userID uint64) (*model.Issue, error) {
-	issue, err := repository.FindIssueByAccess(issueID, userID)
+func (service *issueService) InsertDependentIssueAssociation(issueID uint64, dependentIssueID uint64, userID uint64) (*model.Issue, error) {
+	issue, err := service.issueRepository.FindIssueByAccess(issueID, userID)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(404, "Issue not found", []string{err.Error()})
 	}
-	dependentIssue, err := repository.FindIssueByAccess(dependentIssueID, userID)
+	dependentIssue, err := service.issueRepository.FindIssueByAccess(dependentIssueID, userID)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(404, "Depent Issue not found", []string{err.Error()})
 	}
-	res, err := repository.InsertDependentIssueAssociation(*issue, *dependentIssue)
+	res, err := service.issueRepository.InsertDependentIssueAssociation(*issue, *dependentIssue)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(400, "Depentent Issue insertion error", []string{err.Error()})
 	}
 	return res, err
 }
 
-func AssignieIssueToUser(issueID uint64, assignieID uint64, userID uint64) (*model.Issue, error) {
-	issue, err := repository.FindIssueByAccess(issueID, userID)
+func (service *issueService) AssignieIssueToUser(issueID uint64, assignieID uint64, userID uint64) (*model.Issue, error) {
+	issue, err := service.issueRepository.FindIssueByAccess(issueID, userID)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(404, "Issue not found", []string{err.Error()})
 	}
@@ -100,7 +120,7 @@ func AssignieIssueToUser(issueID uint64, assignieID uint64, userID uint64) (*mod
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(404, "User not found", []string{err.Error()})
 	}
-	res, err := repository.AssignieIssueToUser(*issue, *user)
+	res, err := service.issueRepository.AssignieIssueToUser(*issue, *user)
 	if err != nil {
 		return nil, utils.ReturnErrorResponse(400, "User assignie associtoation insertion error", []string{err.Error()})
 	}

@@ -9,9 +9,30 @@ import (
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
 	"github.com/DEONSKY/go-sandbox/model"
+	"gorm.io/gorm"
 )
 
-func InsertIssue(issue model.Issue) (*model.Issue, error) {
+type IssueRepository interface {
+	InsertIssue(issue model.Issue) (*model.Issue, error)
+	GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error)
+	FindIssue(issue_id uint64) (*model.Issue, error)
+	FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error)
+	InsertDependentIssueAssociation(issue model.Issue, dependentIssue model.Issue) (*model.Issue, error)
+	AssignieIssueToUser(issue model.Issue, user model.User) (*model.Issue, error)
+}
+
+type issueConnection struct {
+	connection *gorm.DB
+}
+
+//NewBookRepository creates an instance BookRepository
+func NewIssueRepository(dbConn *gorm.DB) IssueRepository {
+	return &issueConnection{
+		connection: dbConn,
+	}
+}
+
+func (db *issueConnection) InsertIssue(issue model.Issue) (*model.Issue, error) {
 	if result := config.DB.Save(&issue); result.Error != nil {
 		return nil, result.Error
 	}
@@ -19,7 +40,7 @@ func InsertIssue(issue model.Issue) (*model.Issue, error) {
 	return &issue, nil
 }
 
-func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
+func (db *issueConnection) GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
 
 	var issues []response.IssueResponse
 	var queryParams []string
@@ -82,14 +103,14 @@ func GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.
 	return issues, nil
 }
 
-func FindIssue(issue_id uint64) (*model.Issue, error) {
+func (db *issueConnection) FindIssue(issue_id uint64) (*model.Issue, error) {
 	var issue model.Issue
 	if result := config.DB.First(&issue, issue_id); result.Error != nil {
 		return nil, result.Error
 	}
 	return &issue, nil
 }
-func FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error) {
+func (db *issueConnection) FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error) {
 	var issue model.Issue
 	if result := config.DB.
 		Joins("INNER JOIN subjects s on subject_id = s.id").
@@ -100,14 +121,14 @@ func FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error) {
 	return &issue, nil
 }
 
-func InsertDependentIssueAssociation(issue model.Issue, dependentIssue model.Issue) (*model.Issue, error) {
+func (db *issueConnection) InsertDependentIssueAssociation(issue model.Issue, dependentIssue model.Issue) (*model.Issue, error) {
 	if err := config.DB.Model(&issue).Omit("DependentIssues.*").Association("DependentIssues").Append(&dependentIssue); err != nil {
 		return nil, err
 	}
 	return &issue, nil
 }
 
-func AssignieIssueToUser(issue model.Issue, user model.User) (*model.Issue, error) {
+func (db *issueConnection) AssignieIssueToUser(issue model.Issue, user model.User) (*model.Issue, error) {
 	if err := config.DB.Model(&issue).Omit("Assignie").Association("Assignie").Append(&user); err != nil {
 		return nil, err
 	}
