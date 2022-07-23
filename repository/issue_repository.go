@@ -48,7 +48,7 @@ func (db *issueConnection) GetIssues(issueGetQuery *request.IssueGetQuery, userI
 		Where("user_id", userID)
 
 	if issueGetQuery.ReporterID != nil {
-		chain = chain.Where("reported_id", issueGetQuery.ReporterID)
+		chain = chain.Where("reporter_id", issueGetQuery.ReporterID)
 	}
 	if issueGetQuery.SubjectID != nil {
 		chain = chain.Where("s.id", issueGetQuery.SubjectID)
@@ -60,7 +60,7 @@ func (db *issueConnection) GetIssues(issueGetQuery *request.IssueGetQuery, userI
 		chain = chain.Where("assignie_id", issueGetQuery.AssignieID)
 	}
 	if issueGetQuery.Status != nil {
-		chain = chain.Where("status", issueGetQuery.Status)
+		chain = chain.Where("status_id", issueGetQuery.Status)
 	}
 	if issueGetQuery.ParentIssueID != nil {
 		chain = chain.Where("parent_issue_id", issueGetQuery.ParentIssueID)
