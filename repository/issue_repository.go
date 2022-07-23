@@ -1,10 +1,6 @@
 package repository
 
 import (
-	"database/sql"
-	"log"
-	"strings"
-
 	"github.com/DEONSKY/go-sandbox/config"
 	"github.com/DEONSKY/go-sandbox/dto/request"
 	"github.com/DEONSKY/go-sandbox/dto/response"
@@ -43,58 +39,35 @@ func (db *issueConnection) InsertIssue(issue model.Issue) (*model.Issue, error) 
 func (db *issueConnection) GetIssues(issueGetQuery *request.IssueGetQuery, userID uint64) ([]response.IssueResponse, error) {
 
 	var issues []response.IssueResponse
-	var queryParams []string
-	queryParams = append(queryParams, "subject_id IN (@user_id)")
-	chain := config.DB.Model(&model.Issue{}).Preload("ChildIssues").Preload("DependentIssues") //.Preload("Comments")
 
-	var queryCount uint8
+	chain := config.DB.Model(&model.Issue{}).
+		Preload("ChildIssues").
+		Preload("DependentIssues").
+		Joins("INNER JOIN subjects s on subject_id = s.id").
+		Joins("INNER JOIN subject_users su on su.subject_id = s.id").
+		Where("user_id", userID)
+
 	if issueGetQuery.ReporterID != nil {
-		queryParams = append(queryParams, "reporter_id = @reporter_id")
-		queryCount++
+		chain = chain.Where("reported_id", issueGetQuery.ReporterID)
 	}
 	if issueGetQuery.SubjectID != nil {
-		queryParams = append(queryParams, "subject_id = @subject_id")
-		queryCount++
+		chain = chain.Where("s.id", issueGetQuery.SubjectID)
 	}
 	if issueGetQuery.ProjectID != nil {
-		queryParams = append(queryParams, "subject_id IN (@project_id)")
-		queryCount++
+		chain = chain.Where("project_id", issueGetQuery.ProjectID)
 	}
 	if issueGetQuery.AssignieID != nil {
-		queryParams = append(queryParams, "assignie_id = @assignie_id")
-		queryCount++
+		chain = chain.Where("assignie_id", issueGetQuery.AssignieID)
 	}
 	if issueGetQuery.Status != nil {
-		queryParams = append(queryParams, "status = @status")
-		queryCount++
+		chain = chain.Where("status", issueGetQuery.Status)
 	}
 	if issueGetQuery.ParentIssueID != nil {
-		queryParams = append(queryParams, "parent_issue_id = @parent_issue_id")
-		queryCount++
+		chain = chain.Where("parent_issue_id", issueGetQuery.ParentIssueID)
 	}
 	if issueGetQuery.GetOnlyOrphans != nil {
 		chain = chain.Where("parent_issue_id IS NULL")
 	}
-	res := strings.Join(queryParams, " AND ")
-
-	if queryCount == 0 {
-
-	} else {
-		chain = chain.Where(res,
-			sql.Named("reporter_id", issueGetQuery.ReporterID),
-			sql.Named("subject_id", issueGetQuery.SubjectID),
-			sql.Named("project_id", config.DB.Table("subjects").
-				Select("id").
-				Where("project_id = ?", issueGetQuery.ProjectID)),
-			sql.Named("user_id", config.DB.Table("subject_users").
-				Select("subject_id").
-				Where("user_id = ?", userID)),
-			sql.Named("assignie_id", issueGetQuery.AssignieID),
-			sql.Named("status", issueGetQuery.Status),
-			sql.Named("parent_issue_id", issueGetQuery.ParentIssueID),
-		)
-	}
-	log.Println("Param count: ", len(queryParams))
 
 	if result := chain.Find(&issues); result.Error != nil {
 		return nil, result.Error
@@ -110,6 +83,7 @@ func (db *issueConnection) FindIssue(issue_id uint64) (*model.Issue, error) {
 	}
 	return &issue, nil
 }
+
 func (db *issueConnection) FindIssueByAccess(issue_id uint64, user_id uint64) (*model.Issue, error) {
 	var issue model.Issue
 	if result := config.DB.
