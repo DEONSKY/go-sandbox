@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 )
 
@@ -10,6 +11,7 @@ type EnvironmentVariables struct {
 
 var EnvironmentVariablesData EnvironmentVariables
 
-func LoadEnvVariables() {
-	EnvironmentVariablesData = EnvironmentVariables{os.Getenv("JWT_SECRET")}
+func LoadEnvVariables() EnvironmentVariables {
+	log.Println("loading env variable")
+	return EnvironmentVariables{os.Getenv("JWT_SECRET")}
 }

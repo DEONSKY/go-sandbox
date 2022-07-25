@@ -25,17 +25,20 @@ type jwtService struct {
 }
 
 //NewJWTService method is creates a new instance of JWTService
-func NewJWTService() JWTService {
+func NewJWTService(envVar config.EnvironmentVariables) JWTService {
 	return &jwtService{
 		issuer:    "ydhnwb",
-		secretKey: getSecretKey(),
+		secretKey: envVar.JWTSecret,
 	}
 }
 
+/*
 func getSecretKey() string {
 	secretKey := config.EnvironmentVariablesData.JWTSecret
+	log.Println("secret", secretKey)
 	return secretKey
 }
+*/
 
 func (j *jwtService) GenerateToken(UserID string) string {
 	claims := &jwtCustomClaim{
