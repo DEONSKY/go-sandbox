@@ -13,5 +13,7 @@ var EnvironmentVariablesData EnvironmentVariables
 
 func LoadEnvVariables() EnvironmentVariables {
 	log.Println("loading env variable")
-	return EnvironmentVariables{os.Getenv("JWT_SECRET")}
+
+	EnvironmentVariablesData = EnvironmentVariables{os.Getenv("JWT_SECRET")}
+	return EnvironmentVariablesData
 }
