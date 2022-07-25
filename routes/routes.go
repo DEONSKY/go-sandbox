@@ -16,15 +16,16 @@ import (
 )
 
 var (
-	db              *gorm.DB                   = config.SetupDatabaseConnection()
-	bookRepository  repository.BookRepository  = repository.NewBookRepository(db)
-	issueRepository repository.IssueRepository = repository.NewIssueRepository(db)
-	issueService    service.IssueService       = service.NewIssueService(issueRepository)
-	issueHandler    handler.IssueHandler       = handler.NewIssueHandler(issueService)
-	jwtService      service.JWTService         = service.NewJWTService()
-	bookService     service.BookService        = service.NewBookService(bookRepository)
-	authHandler     handler.AuthHandler        = handler.NewAuthController(jwtService)
-	bookHandler     handler.BookHandler        = handler.NewBookController(bookService, jwtService)
+	db              *gorm.DB                    = config.SetupDatabaseConnection()
+	envVariables    config.EnvironmentVariables = config.LoadEnvVariables()
+	bookRepository  repository.BookRepository   = repository.NewBookRepository(db)
+	issueRepository repository.IssueRepository  = repository.NewIssueRepository(db)
+	issueService    service.IssueService        = service.NewIssueService(issueRepository)
+	issueHandler    handler.IssueHandler        = handler.NewIssueHandler(issueService)
+	jwtService      service.JWTService          = service.NewJWTService(envVariables)
+	bookService     service.BookService         = service.NewBookService(bookRepository)
+	authHandler     handler.AuthHandler         = handler.NewAuthController(jwtService)
+	bookHandler     handler.BookHandler         = handler.NewBookController(bookService, jwtService)
 )
 
 func New() *fiber.App {
