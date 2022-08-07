@@ -43,6 +43,8 @@ func (db *issueConnection) GetIssues(issueGetQuery *request.IssueGetQuery, userI
 	chain := config.DB.Model(&model.Issue{}).
 		Preload("ChildIssues").
 		Preload("DependentIssues").
+		Preload("Assignie").
+		Preload("Reporter").
 		Joins("INNER JOIN subjects s on subject_id = s.id").
 		Joins("INNER JOIN subject_users su on su.subject_id = s.id").
 		Where("user_id", userID)
@@ -103,7 +105,7 @@ func (db *issueConnection) InsertDependentIssueAssociation(issue model.Issue, de
 }
 
 func (db *issueConnection) AssignieIssueToUser(issue model.Issue, user model.User) (*model.Issue, error) {
-	if err := config.DB.Model(&issue).Omit("Assignie").Association("Assignie").Append(&user); err != nil {
+	if err := config.DB.Model(&issue).Association("Assignie").Append(&user); err != nil {
 		return nil, err
 	}
 	return &issue, nil
